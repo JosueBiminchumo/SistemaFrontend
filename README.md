@@ -1,16 +1,17 @@
-# React + Vite
+# MediTurno - Sistema Web para la Gestión de Citas Médicas
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Resumen
+MediTurno es una aplicación web orientada a consultorios y centros médicos pequeños que centralizará la información de pacientes, médicos, especialidades, horarios y citas en una sola plataforma[cite: 1]. El propósito central es reducir los cruces de horarios y mejorar la organización del proceso de reserva y seguimiento de citas médicas[cite: 1].
 
-Currently, two official plugins are available:
+##  Tecnologías y Herramientas
+* **Frontend:** React[cite: 1]
+* **Backend:** Java con Spring Boot[cite: 1]
+* **Base de Datos:** MySQL[cite: 1]
+* **Gestión y Control de Versiones:** Git, GitHub y Jira[cite: 1]
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Roles de Usuario
+El sistema cuenta con accesos diferenciados para tres tipos de usuarios[cite: 1]:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+* **Paciente:** Consulta médicos y horarios; reserva, cancela o reprograma citas; revisa su historial[cite: 1].
+* **Médico:** Administra su disponibilidad, consulta su agenda y actualiza el estado de las citas[cite: 1].
+* **Administrador:** Gestiona usuarios, médicos, pacientes, especialidades y citas; consulta indicadores básicos[cite: 1].

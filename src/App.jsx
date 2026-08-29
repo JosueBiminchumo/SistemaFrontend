@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-// Importación de vistas (asegúrate de que los nombres coincidan con los tuyos)
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import PatientDashboard from './pages/patient/PatientDashboard';

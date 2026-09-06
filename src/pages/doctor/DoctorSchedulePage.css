@@ -1,0 +1,212 @@
+.doctor-schedule {
+  --ds-primary: #2563eb;
+  --ds-primary-hover: #1d4ed8;
+  --ds-danger: #dc2626;
+  --ds-text: #1e293b;
+  --ds-text-muted: #64748b;
+  --ds-border: #e2e8f0;
+  --ds-bg-card: #ffffff;
+  --ds-bg-page: #f8fafc;
+
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+  color: var(--ds-text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.doctor-schedule__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.doctor-schedule__header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.doctor-schedule__subtitle {
+  margin: 4px 0 0;
+  color: var(--ds-text-muted);
+  font-size: 14px;
+}
+
+.doctor-schedule__feedback {
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+/* Botones reutilizables (locales por ahora) */
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn--primary {
+  background: var(--ds-primary);
+  color: white;
+}
+
+.btn--primary:hover {
+  background: var(--ds-primary-hover);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ds-text-muted);
+  border: 1px solid var(--ds-border);
+}
+
+.btn--ghost:hover {
+  background: var(--ds-bg-page);
+}
+
+/* Formulario */
+.schedule-form {
+  background: var(--ds-bg-card);
+  border: 1px solid var(--ds-border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.schedule-form__title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.schedule-form__error {
+  background: #fef2f2;
+  color: var(--ds-danger);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.schedule-form__row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.schedule-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.schedule-form__field label {
+  font-weight: 600;
+  color: var(--ds-text-muted);
+}
+
+.schedule-form__field select,
+.schedule-form__field input {
+  padding: 8px 10px;
+  border: 1px solid var(--ds-border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.schedule-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Calendario semanal */
+.schedule-calendar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.schedule-calendar__day {
+  background: var(--ds-bg-card);
+  border: 1px solid var(--ds-border);
+  border-radius: 10px;
+  padding: 14px;
+  min-height: 120px;
+}
+
+.schedule-calendar__day-header {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ds-border);
+  color: var(--ds-primary);
+}
+
+.schedule-calendar__empty {
+  font-size: 12px;
+  color: var(--ds-text-muted);
+  text-align: center;
+  margin-top: 20px;
+}
+
+.schedule-calendar__slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schedule-slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #eff6ff;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ds-primary);
+}
+
+.schedule-slot__delete {
+  background: none;
+  border: none;
+  color: var(--ds-danger);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.schedule-slot__delete:hover {
+  opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .doctor-schedule__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .schedule-form__row {
+    flex-direction: column;
+  }
+}

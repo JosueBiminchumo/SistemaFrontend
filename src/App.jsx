@@ -6,7 +6,7 @@ import Navbar from './components/Navbar';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import PatientDashboard from './pages/patient/PatientDashboard';
-import DoctorSchedule from './pages/doctor/DoctorSchedule';
+import DoctorSchedule from "./pages/doctor/DoctorSchedulePage";
 import AdminDashboard from './pages/admin/AdminDashboard';
 
 export default function App() {

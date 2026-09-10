@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { doctorAppointments } from './doctorAppointmentsMock';
 import './DoctorAppointmentDetailPage.css';
 
@@ -12,7 +12,6 @@ const nextStatusOptions = {
 
 export default function DoctorAppointmentDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const original = useMemo(
     () => doctorAppointments.find((appt) => appt.id === Number(id)),

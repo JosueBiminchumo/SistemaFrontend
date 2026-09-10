@@ -21,4 +21,3 @@ api.interceptors.request.use(
 );
 
 export default api;
-//en caso queramos cambiar y poner ya el backend pues solo cambiamos el baseURL a la url del backend y ya no se tendria que cambiar nada mas//

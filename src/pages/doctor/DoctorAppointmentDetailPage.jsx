@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getAppointments, saveAppointments } from './doctorStorage';
+import DoctorLayout from './DoctorLayout';
 import './DoctorAppointmentDetailPage.css';
 
 const nextStatusOptions = {
@@ -22,10 +23,12 @@ export default function DoctorAppointmentDetailPage() {
 
   if (!original) {
     return (
-      <div className="doctor-appointment-detail">
-        <p className="doctor-appointment-detail__empty">Cita no encontrada.</p>
-        <Link to="/medico/citas">← Volver a mis citas</Link>
-      </div>
+      <DoctorLayout>
+        <div className="doctor-appointment-detail">
+          <p className="doctor-appointment-detail__empty">Cita no encontrada.</p>
+          <Link to="/medico/citas">← Volver a mis citas</Link>
+        </div>
+      </DoctorLayout>
     );
   }
 
@@ -40,52 +43,54 @@ export default function DoctorAppointmentDetailPage() {
   };
 
   return (
-    <div className="doctor-appointment-detail">
-      <Link to="/medico/citas" className="doctor-appointment-detail__back">← Volver a mis citas</Link>
+    <DoctorLayout>
+      <div className="doctor-appointment-detail">
+        <Link to="/medico/citas" className="doctor-appointment-detail__back">← Volver a mis citas</Link>
 
-      <header className="doctor-appointment-detail__header">
-        <h1>Cita con {original.patientName}</h1>
-        <span className={`appointment-status appointment-status--${original.status.toLowerCase()}`}>
-          {original.status}
-        </span>
-      </header>
+        <header className="doctor-appointment-detail__header">
+          <h1>Cita con {original.patientName}</h1>
+          <span className={`appointment-status appointment-status--${original.status.toLowerCase()}`}>
+            {original.status}
+          </span>
+        </header>
 
-      {feedback && <div className="doctor-appointment-detail__feedback">{feedback}</div>}
+        {feedback && <div className="doctor-appointment-detail__feedback">{feedback}</div>}
 
-      <div className="doctor-appointment-detail__card">
-        <div className="detail-row">
-          <span className="detail-row__label">Paciente</span>
-          <span className="detail-row__value">{original.patientName}</span>
+        <div className="doctor-appointment-detail__card">
+          <div className="detail-row">
+            <span className="detail-row__label">Paciente</span>
+            <span className="detail-row__value">{original.patientName}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-row__label">Fecha</span>
+            <span className="detail-row__value">{original.date}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-row__label">Hora</span>
+            <span className="detail-row__value">{original.time}</span>
+          </div>
+          <div className="detail-row">
+            <span className="detail-row__label">Motivo</span>
+            <span className="detail-row__value">{original.reason}</span>
+          </div>
         </div>
-        <div className="detail-row">
-          <span className="detail-row__label">Fecha</span>
-          <span className="detail-row__value">{original.date}</span>
-        </div>
-        <div className="detail-row">
-          <span className="detail-row__label">Hora</span>
-          <span className="detail-row__value">{original.time}</span>
-        </div>
-        <div className="detail-row">
-          <span className="detail-row__label">Motivo</span>
-          <span className="detail-row__value">{original.reason}</span>
-        </div>
+
+        {nextStatusOptions[original.status]?.length > 0 && (
+          <div className="doctor-appointment-detail__actions">
+            <span className="doctor-appointment-detail__actions-label">Actualizar estado:</span>
+            {nextStatusOptions[original.status].map((option) => (
+              <button
+                key={option}
+                type="button"
+                className={`btn-status btn-status--${option.toLowerCase()}`}
+                onClick={() => handleStatusChange(option)}
+              >
+                Marcar como {option}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-
-      {nextStatusOptions[original.status]?.length > 0 && (
-        <div className="doctor-appointment-detail__actions">
-          <span className="doctor-appointment-detail__actions-label">Actualizar estado:</span>
-          {nextStatusOptions[original.status].map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={`btn-status btn-status--${option.toLowerCase()}`}
-              onClick={() => handleStatusChange(option)}
-            >
-              Marcar como {option}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+    </DoctorLayout>
   );
 }

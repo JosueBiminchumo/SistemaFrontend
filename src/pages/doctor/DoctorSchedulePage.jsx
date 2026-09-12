@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ScheduleCalendar from '../../components/ScheduleCalendar';
 import ScheduleForm from '../../components/ScheduleForm';
 import { getSchedule, saveSchedule } from './doctorStorage';
+import DoctorLayout from './DoctorLayout';
 import './DoctorSchedulePage.css';
 
 export default function DoctorSchedulePage() {
@@ -11,10 +12,7 @@ export default function DoctorSchedulePage() {
 
   const handleAdd = (newSlot) => {
     const hasOverlap = slots.some(
-      (slot) =>
-        slot.day === newSlot.day &&
-        newSlot.startTime < slot.endTime &&
-        newSlot.endTime > slot.startTime
+      (slot) => slot.day === newSlot.day && newSlot.startTime < slot.endTime && newSlot.endTime > slot.startTime
     );
 
     if (hasOverlap) {
@@ -37,25 +35,24 @@ export default function DoctorSchedulePage() {
   };
 
   return (
-    <div className="doctor-schedule">
-      <header className="doctor-schedule__header">
-        <div>
-          <h1>Mi agenda</h1>
-          <p className="doctor-schedule__subtitle">Gestiona tus horarios disponibles por semana</p>
-        </div>
+    <DoctorLayout>
+      <div className="doctor-schedule">
+        <header className="doctor-schedule__header">
+          <div>
+            <h1>Mi agenda</h1>
+            <p className="doctor-schedule__subtitle">Gestiona tus horarios disponibles por semana</p>
+          </div>
+          <button type="button" className="btn btn--primary" onClick={() => setShowForm(true)}>
+            + Agregar horario
+          </button>
+        </header>
 
-        <button type="button" className="btn btn--primary" onClick={() => setShowForm(true)}>
-          + Agregar horario
-        </button>
-      </header>
+        {feedback && <div className="doctor-schedule__feedback">{feedback}</div>}
 
-      {feedback && <div className="doctor-schedule__feedback">{feedback}</div>}
+        {showForm && <ScheduleForm onAdd={handleAdd} onCancel={() => setShowForm(false)} />}
 
-      {showForm && (
-        <ScheduleForm onAdd={handleAdd} onCancel={() => setShowForm(false)} />
-      )}
-
-      <ScheduleCalendar slots={slots} onDelete={handleDelete} />
-    </div>
+        <ScheduleCalendar slots={slots} onDelete={handleDelete} />
+      </div>
+    </DoctorLayout>
   );
 }

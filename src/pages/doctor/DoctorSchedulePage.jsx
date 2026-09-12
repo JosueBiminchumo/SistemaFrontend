@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import ScheduleCalendar from '../../components/ScheduleCalendar';
 import ScheduleForm from '../../components/ScheduleForm';
-import { initialScheduleSlots } from './doctorScheduleMock';
+import { getSchedule, saveSchedule } from './doctorStorage';
 import './DoctorSchedulePage.css';
 
 export default function DoctorSchedulePage() {
-  const [slots, setSlots] = useState(initialScheduleSlots);
+  const [slots, setSlots] = useState(() => getSchedule());
   const [showForm, setShowForm] = useState(false);
   const [feedback, setFeedback] = useState('');
 
@@ -22,14 +22,18 @@ export default function DoctorSchedulePage() {
       return;
     }
 
-    setSlots((prev) => [...prev, { id: Date.now(), ...newSlot }]);
+    const updated = [...slots, { id: Date.now(), ...newSlot }];
+    setSlots(updated);
+    saveSchedule(updated);
     setShowForm(false);
     setFeedback('Horario agregado correctamente.');
     setTimeout(() => setFeedback(''), 2500);
   };
 
   const handleDelete = (id) => {
-    setSlots((prev) => prev.filter((slot) => slot.id !== id));
+    const updated = slots.filter((slot) => slot.id !== id);
+    setSlots(updated);
+    saveSchedule(updated);
   };
 
   return (

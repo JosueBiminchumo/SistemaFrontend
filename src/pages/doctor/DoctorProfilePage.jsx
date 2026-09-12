@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { initialDoctorProfile } from './doctorProfileMock';
+import { getProfile, saveProfile } from './doctorStorage';
 import './DoctorProfilePage.css';
 
 export default function DoctorProfilePage() {
-  const [profile, setProfile] = useState(initialDoctorProfile);
-  const [form, setForm] = useState(initialDoctorProfile);
+  const [profile, setProfile] = useState(() => getProfile());
+  const [form, setForm] = useState(profile);
   const [isEditing, setIsEditing] = useState(false);
   const [feedback, setFeedback] = useState('');
 
@@ -15,6 +15,7 @@ export default function DoctorProfilePage() {
   const handleSave = (e) => {
     e.preventDefault();
     setProfile(form);
+    saveProfile(form);
     setIsEditing(false);
     setFeedback('Perfil actualizado correctamente.');
     setTimeout(() => setFeedback(''), 2500);
@@ -58,27 +59,22 @@ export default function DoctorProfilePage() {
             <label htmlFor="name">Nombre</label>
             <input id="name" type="text" value={form.name} onChange={handleChange('name')} required />
           </div>
-
           <div className="form-group">
             <label htmlFor="specialty">Especialidad</label>
             <input id="specialty" type="text" value={form.specialty} onChange={handleChange('specialty')} required />
           </div>
-
           <div className="form-group">
             <label htmlFor="email">Correo</label>
             <input id="email" type="email" value={form.email} onChange={handleChange('email')} required />
           </div>
-
           <div className="form-group">
             <label htmlFor="phone">Teléfono</label>
             <input id="phone" type="tel" value={form.phone} onChange={handleChange('phone')} />
           </div>
-
           <div className="form-group">
             <label htmlFor="bio">Biografía</label>
             <textarea id="bio" rows="3" value={form.bio} onChange={handleChange('bio')} />
           </div>
-
           <div className="doctor-profile__form-actions">
             <button type="button" className="btn btn--ghost" onClick={handleCancel}>Cancelar</button>
             <button type="submit" className="btn btn--primary">Guardar cambios</button>

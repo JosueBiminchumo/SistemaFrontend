@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { doctorAppointments } from './doctorAppointmentsMock';
+import { useParams, Link } from 'react-router-dom';
+import { getAppointments, saveAppointments } from './doctorStorage';
 import './DoctorAppointmentDetailPage.css';
 
 const nextStatusOptions = {
@@ -12,15 +12,13 @@ const nextStatusOptions = {
 
 export default function DoctorAppointmentDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const [appointments, setAppointments] = useState(() => getAppointments());
+  const [feedback, setFeedback] = useState('');
 
   const original = useMemo(
-    () => doctorAppointments.find((appt) => appt.id === Number(id)),
-    [id]
+    () => appointments.find((appt) => appt.id === Number(id)),
+    [appointments, id]
   );
-
-  const [status, setStatus] = useState(original?.status);
-  const [feedback, setFeedback] = useState('');
 
   if (!original) {
     return (
@@ -32,7 +30,11 @@ export default function DoctorAppointmentDetailPage() {
   }
 
   const handleStatusChange = (newStatus) => {
-    setStatus(newStatus);
+    const updated = appointments.map((appt) =>
+      appt.id === original.id ? { ...appt, status: newStatus } : appt
+    );
+    setAppointments(updated);
+    saveAppointments(updated);
     setFeedback(`Estado actualizado a ${newStatus}.`);
     setTimeout(() => setFeedback(''), 2500);
   };
@@ -43,8 +45,8 @@ export default function DoctorAppointmentDetailPage() {
 
       <header className="doctor-appointment-detail__header">
         <h1>Cita con {original.patientName}</h1>
-        <span className={`appointment-status appointment-status--${status.toLowerCase()}`}>
-          {status}
+        <span className={`appointment-status appointment-status--${original.status.toLowerCase()}`}>
+          {original.status}
         </span>
       </header>
 
@@ -69,10 +71,10 @@ export default function DoctorAppointmentDetailPage() {
         </div>
       </div>
 
-      {nextStatusOptions[status]?.length > 0 && (
+      {nextStatusOptions[original.status]?.length > 0 && (
         <div className="doctor-appointment-detail__actions">
           <span className="doctor-appointment-detail__actions-label">Actualizar estado:</span>
-          {nextStatusOptions[status].map((option) => (
+          {nextStatusOptions[original.status].map((option) => (
             <button
               key={option}
               type="button"

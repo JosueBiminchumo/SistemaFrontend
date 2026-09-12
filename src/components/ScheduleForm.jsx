@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { weekDays } from '../pages/doctor/doctorScheduleMock';
+import { weekDays } from '../pages/doctor/doctorStorage';
 
 export default function ScheduleForm({ onAdd, onCancel }) {
   const [day, setDay] = useState(weekDays[0]);

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { appointmentStatuses, doctorAppointments } from './doctorAppointmentsMock';
+import { appointmentStatuses, doctorAppointments } from './doctorStorage';
 import './DoctorAppointmentsPage.css';
 
 export default function DoctorAppointmentsPage() {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { doctorAppointments } from './doctorAppointmentsMock';
+import { doctorAppointments } from './doctorStorage';
 import './DoctorAppointmentDetailPage.css';
 
 const nextStatusOptions = {

@@ -1,37 +1,50 @@
 import { Link } from 'react-router-dom';
-import { todayAppointments, upcomingAppointments, doctorSummary } from './doctorDashboardMock';
+import { getAppointments, getProfile, todayISO } from './doctorStorage';
 import './DoctorDashboardPage.css';
 
-function getInitials(fullName) {
-  return fullName
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0])
-    .join('')
-    .toUpperCase();
+function formatToday() {
+  return new Date().toLocaleDateString('es-PE', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
 }
 
 export default function DoctorDashboardPage() {
+  const profile = getProfile();
+  const appointments = getAppointments();
+  const today = todayISO(0);
+
+  const todayAppointments = appointments
+    .filter((appt) => appt.date === today && appt.status !== 'CANCELADA')
+    .sort((a, b) => a.time.localeCompare(b.time));
+
+  const upcomingAppointments = appointments
+    .filter((appt) => appt.date > today && appt.status !== 'CANCELADA')
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+    .slice(0, 5);
+
+  const totalPending = appointments.filter(
+    (appt) => appt.date === today && appt.status === 'PENDIENTE'
+  ).length;
+
   return (
     <div className="doctor-dashboard">
       <header className="doctor-dashboard__header">
-        <div className="doctor-dashboard__avatar">{getInitials(doctorSummary.name)}</div>
-        <div>
-          <h1>Bienvenido, {doctorSummary.name}</h1>
-          <p className="doctor-dashboard__subtitle">
-            <span className="doctor-dashboard__badge">{doctorSummary.specialty}</span>
-          </p>
+        <div className="doctor-dashboard__header-text">
+          <p className="doctor-dashboard__subtitle">{profile.specialty}</p>
+          <h1>{profile.name}</h1>
         </div>
+        <span className="doctor-dashboard__date">{formatToday()}</span>
       </header>
 
       <section className="doctor-dashboard__stats">
         <div className="stat-card">
-          <span className="stat-card__value">{doctorSummary.totalToday}</span>
+          <span className="stat-card__value">{todayAppointments.length}</span>
           <span className="stat-card__label">Citas de hoy</span>
         </div>
         <div className="stat-card">
-          <span className="stat-card__value">{doctorSummary.totalPending}</span>
+          <span className="stat-card__value">{totalPending}</span>
           <span className="stat-card__label">Pendientes</span>
         </div>
         <div className="stat-card">

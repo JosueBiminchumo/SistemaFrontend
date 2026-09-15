@@ -5,7 +5,9 @@ import Navbar from './components/Navbar';
 
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import PatientDashboard from './pages/patient/PatientDashboard';
+import PatientDashboardPage from './pages/patient/PatientDashboardPage';
+import SearchDoctorsPage from './pages/patient/SearchDoctorsPage';
+import DoctorDetailPage from './pages/patient/DoctorDetailPage';
 import DoctorDashboard from './pages/doctor/DoctorDashboardPage';
 import DoctorSchedule from "./pages/doctor/DoctorSchedulePage";
 import DoctorAppointments from './pages/doctor/DoctorAppointmentsPage';
@@ -24,7 +26,9 @@ export default function App() {
         <Route path="/registro" element={<Register />} />
 
         {/* Rutas del Paciente */}
-        <Route path="/paciente/inicio" element={<PatientDashboard />} />
+        <Route path="/paciente/inicio" element={<PatientDashboardPage />} />
+        <Route path="/paciente/buscar" element={<SearchDoctorsPage />} />
+        <Route path="/paciente/medicos/:id" element={<DoctorDetailPage />} />
 
         {/* Rutas del Médico */}
         <Route path="/medico/dashboard" element={<DoctorDashboard />} />

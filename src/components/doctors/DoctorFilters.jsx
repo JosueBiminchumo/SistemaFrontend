@@ -1,4 +1,4 @@
-import React from 'react';
+const EMPTY_FILTERS = { name: '', specialty: '', availability: false };
 
 const DoctorFilters = ({ filters, setFilters, specialties }) => {
   const handleChange = (e) => {
@@ -9,9 +9,26 @@ const DoctorFilters = ({ filters, setFilters, specialties }) => {
     });
   };
 
+  const handleClear = () => {
+    setFilters(EMPTY_FILTERS);
+  };
+
+  const hasActiveFilters =
+    filters.name !== '' || filters.specialty !== '' || filters.availability;
+
   return (
     <div className="p-4 mb-4 border rounded shadow-sm bg-light">
-      <h5 className="mb-3">Filtrar Médicos</h5>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="mb-0">Filtrar Médicos</h5>
+        <button
+          type="button"
+          className="btn btn-sm btn-outline-secondary"
+          onClick={handleClear}
+          disabled={!hasActiveFilters}
+        >
+          Limpiar filtros
+        </button>
+      </div>
       <div className="row g-3">
         <div className="col-md-4">
           <input

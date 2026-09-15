@@ -1,10 +1,11 @@
-import React from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doctorsMock } from './doctorsMock';
 
 const DoctorDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [selectedTime, setSelectedTime] = useState(null);
 
   // Buscar el médico por el ID de la URL
   const doctor = doctorsMock.find(doc => doc.id === parseInt(id));
@@ -55,7 +56,12 @@ const DoctorDetailPage = () => {
             {doctor.schedule && doctor.schedule.length > 0 ? (
               <div className="d-flex flex-wrap gap-2 mb-4">
                 {doctor.schedule.map((time, index) => (
-                  <button key={index} className="btn btn-outline-primary">
+                  <button
+                    key={index}
+                    type="button"
+                    className={`btn ${selectedTime === time ? 'btn-primary' : 'btn-outline-primary'}`}
+                    onClick={() => setSelectedTime(time)}
+                  >
                     {time}
                   </button>
                 ))}
@@ -66,10 +72,10 @@ const DoctorDetailPage = () => {
 
             <button 
               className="btn btn-success btn-lg mt-auto"
-              disabled={!doctor.availability || doctor.schedule.length === 0}
-              onClick={() => alert('La lógica para reservar la cita se implementará en el siguiente ticket.')}
+              disabled={!doctor.availability || doctor.schedule.length === 0 || !selectedTime}
+              onClick={() => alert(`Horario seleccionado: ${selectedTime}. La lógica para reservar la cita se implementará en el siguiente ticket.`)}
             >
-              Continuar con la Reserva
+              {selectedTime ? `Continuar con la Reserva (${selectedTime})` : 'Selecciona un horario para continuar'}
             </button>
           </div>
         </div>

@@ -1,6 +1,68 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import AppointmentCard from '../../components/appointments/AppointmentCard';
 import './MyAppointmentsPage.css';
 
+const initialAppointments = [
+  {
+    id: 1,
+    doctor: 'Dr. Carlos Ramírez',
+    specialty: 'Medicina General',
+    date: '20 de septiembre de 2026',
+    time: '09:00',
+    status: 'confirmed',
+  },
+  {
+    id: 2,
+    doctor: 'Dra. María López',
+    specialty: 'Cardiología',
+    date: '25 de septiembre de 2026',
+    time: '15:00',
+    status: 'pending',
+  },
+];
+
 export default function MyAppointmentsPage() {
+  const [appointments, setAppointments] = useState(initialAppointments);
+
+    const handleCancel = (id) => {
+    Swal.fire({
+        title: '¿Cancelar esta cita?',
+        text: 'La cita pasará a estado cancelada.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Cancelar cita',
+        cancelButtonText: 'Volver',
+        reverseButtons: true,
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#e2e8f0',
+        customClass: {
+        cancelButton: 'swal-cancel-button',
+        },
+    }).then((result) => {
+        if (!result.isConfirmed) {
+        return;
+        }
+
+        setAppointments((currentAppointments) =>
+        currentAppointments.map((appointment) =>
+            appointment.id === id
+            ? { ...appointment, status: 'cancelled' }
+            : appointment
+        )
+        );
+
+        Swal.fire({
+        title: 'Cita cancelada',
+        text: 'Tu cita ha sido cancelada correctamente.',
+        icon: 'success',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2563eb',
+        });
+    });
+    };
+
   return (
     <main className="my-appointments-page">
       <section className="my-appointments-container">
@@ -10,91 +72,25 @@ export default function MyAppointmentsPage() {
             <p>Consulta y gestiona tus citas médicas.</p>
           </div>
 
-          <button className="new-appointment-button">
+          <Link
+            to="/paciente/reservar-cita"
+            className="new-appointment-button"
+          >
             Nueva cita
-          </button>
+          </Link>
         </div>
 
         <div className="appointments-list">
-          <article className="appointment-card">
-            <div className="appointment-card-header">
-              <div>
-                <h2>Dr. Carlos Ramírez</h2>
-                <p>Medicina General</p>
-              </div>
-
-              <span className="appointment-status status-confirmed">
-                Confirmada
-              </span>
-            </div>
-
-            <div className="appointment-info">
-              <div>
-                <span>Fecha</span>
-                <strong>20 de septiembre de 2026</strong>
-              </div>
-
-              <div>
-                <span>Hora</span>
-                <strong>09:00</strong>
-              </div>
-            </div>
-
-            <div className="appointment-card-actions">
-              <button className="detail-button">
-                Ver detalle
-              </button>
-
-              <button className="reschedule-button">
-                Reprogramar
-              </button>
-
-              <button className="cancel-button">
-                Cancelar
-              </button>
-            </div>
-          </article>
-
-          <article className="appointment-card">
-            <div className="appointment-card-header">
-              <div>
-                <h2>Dra. María López</h2>
-                <p>Cardiología</p>
-              </div>
-
-              <span className="appointment-status status-pending">
-                Pendiente
-              </span>
-            </div>
-
-            <div className="appointment-info">
-              <div>
-                <span>Fecha</span>
-                <strong>25 de septiembre de 2026</strong>
-              </div>
-
-              <div>
-                <span>Hora</span>
-                <strong>15:00</strong>
-              </div>
-            </div>
-
-            <div className="appointment-card-actions">
-              <button className="detail-button">
-                Ver detalle
-              </button>
-
-              <button className="reschedule-button">
-                Reprogramar
-              </button>
-
-              <button className="cancel-button">
-                Cancelar
-              </button>
-            </div>
-          </article>
+          {appointments.map((appointment) => (
+            <AppointmentCard
+              key={appointment.id}
+              appointment={appointment}
+              onCancel={handleCancel}
+            />
+          ))}
         </div>
       </section>
     </main>
   );
 }
+

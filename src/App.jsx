@@ -10,6 +10,7 @@ import DoctorSchedule from "./pages/doctor/DoctorSchedulePage";
 import AdminDashboard from './pages/admin/AdminDashboard';
 import BookAppointmentPage from './pages/patient/BookAppointmentPage';
 import MyAppointmentsPage from './pages/patient/MyAppointmentsPage';
+import AppointmentDetailPage from './pages/patient/AppointmentDetailPage';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/paciente/inicio" element={<PatientDashboard />} />
         <Route path="/paciente/reservar-cita" element={<BookAppointmentPage />} />
         <Route path="/paciente/mis-citas" element={<MyAppointmentsPage />} />
+        <Route path="/paciente/cita/:id" element={<AppointmentDetailPage />}/>
         
         {/* Rutas del Médico */}
         <Route path="/medico/agenda" element={<DoctorSchedule />} />

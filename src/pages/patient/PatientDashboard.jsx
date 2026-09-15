@@ -1,14 +1,87 @@
 import { Link } from 'react-router-dom';
 import './PatientDashboard.css';
 
+function getAppointments() {
+  const storedAppointments = localStorage.getItem('appointments');
+
+  if (!storedAppointments) {
+    return [];
+  }
+
+  return JSON.parse(storedAppointments);
+}
+
+function getProfile() {
+  const storedProfile = localStorage.getItem('patientProfile');
+
+  if (!storedProfile) {
+    return {
+      firstName: 'Juan',
+      lastName: 'Pérez',
+    };
+  }
+
+  return JSON.parse(storedProfile);
+}
+
+function formatDate(date) {
+  if (!date) {
+    return '';
+  }
+
+  if (date.includes(' de ')) {
+    return date;
+  }
+
+  const [year, month, day] = date.split('-');
+
+  const months = [
+    'enero',
+    'febrero',
+    'marzo',
+    'abril',
+    'mayo',
+    'junio',
+    'julio',
+    'agosto',
+    'septiembre',
+    'octubre',
+    'noviembre',
+    'diciembre',
+  ];
+
+  return `${day} de ${months[Number(month) - 1]} de ${year}`;
+}
+
 export default function PatientDashboard() {
+  const profile = getProfile();
+  const appointments = getAppointments();
+
+  const activeAppointments = appointments.filter(
+    (appointment) => appointment.status !== 'cancelled'
+  );
+
+  const nextAppointment = activeAppointments[0];
+
+  const pendingAppointments = appointments.filter(
+    (appointment) => appointment.status === 'pending'
+  );
+
+  const completedAppointments = appointments.filter(
+    (appointment) => appointment.status === 'completed'
+  );
+
   return (
     <main className="patient-dashboard">
       <section className="patient-dashboard-container">
         <div className="patient-dashboard-header">
           <div>
-            <span className="patient-dashboard-label">Portal del paciente</span>
-            <h1>¡Hola, Juan!</h1>
+            <span className="patient-dashboard-label">
+              Portal del paciente
+            </span>
+
+            <h1>¡Hola, {profile.firstName}!</h1>
+
             <p>Gestiona tus citas y consulta tu información médica.</p>
           </div>
 
@@ -17,50 +90,92 @@ export default function PatientDashboard() {
           </Link>
         </div>
 
-        <section className="next-appointment-card">
-          <div className="next-appointment-header">
-            <div>
-              <span>PRÓXIMA CITA</span>
-              <h2>Dr. Carlos Ramírez</h2>
-              <p>Medicina General</p>
+        {nextAppointment ? (
+          <section className="next-appointment-card">
+            <div className="next-appointment-header">
+              <div>
+                <span>PRÓXIMA CITA</span>
+
+                <h2>{nextAppointment.doctor}</h2>
+
+                <p>{nextAppointment.specialty}</p>
+              </div>
+
+              <span className="appointment-status">
+                {nextAppointment.status === 'confirmed'
+                  ? 'Confirmada'
+                  : nextAppointment.status === 'pending'
+                    ? 'Pendiente'
+                    : nextAppointment.status === 'completed'
+                      ? 'Atendida'
+                      : 'Pendiente'}
+              </span>
             </div>
 
-            <span className="appointment-status">
-              Confirmada
-            </span>
-          </div>
+            <div className="appointment-details">
+              <div className="appointment-detail">
+                <span>Fecha</span>
 
-          <div className="appointment-details">
-            <div className="appointment-detail">
-              <span>Fecha</span>
-              <strong>20 septiembre 2026</strong>
+                <strong>
+                  {formatDate(nextAppointment.date)}
+                </strong>
+              </div>
+
+              <div className="appointment-detail">
+                <span>Hora</span>
+
+                <strong>{nextAppointment.time}</strong>
+              </div>
+
+              <div className="appointment-detail">
+                <span>Modalidad</span>
+
+                <strong>Presencial</strong>
+              </div>
             </div>
 
-            <div className="appointment-detail">
-              <span>Hora</span>
-              <strong>09:00 a. m.</strong>
+            <div className="next-appointment-actions">
+              <Link
+                to={`/paciente/cita/${nextAppointment.id}`}
+              >
+                Ver detalle
+              </Link>
+
+              {nextAppointment.status !== 'completed' && (
+                <Link
+                  to={`/paciente/cita/${nextAppointment.id}/reprogramar`}
+                >
+                  Reprogramar
+                </Link>
+              )}
+            </div>
+          </section>
+        ) : (
+          <section className="next-appointment-card">
+            <div className="next-appointment-header">
+              <div>
+                <span>PRÓXIMA CITA</span>
+
+                <h2>No tienes citas próximas</h2>
+
+                <p>
+                  Puedes reservar una nueva cita cuando lo necesites.
+                </p>
+              </div>
             </div>
 
-            <div className="appointment-detail">
-              <span>Modalidad</span>
-              <strong>Presencial</strong>
+            <div className="next-appointment-actions">
+              <Link to="/paciente/reservar-cita">
+                Reservar cita
+              </Link>
             </div>
-          </div>
-
-          <div className="next-appointment-actions">
-            <Link to="/paciente/cita/1">
-              Ver detalle
-            </Link>
-
-            <Link to="/paciente/cita/1/reprogramar">
-              Reprogramar
-            </Link>
-          </div>
-        </section>
+          </section>
+        )}
 
         <section className="patient-dashboard-section">
           <div className="section-title">
             <h2>¿Qué deseas hacer?</h2>
+
             <p>Accede rápidamente a las opciones de tu cuenta.</p>
           </div>
 
@@ -70,6 +185,7 @@ export default function PatientDashboard() {
 
               <div>
                 <strong>Solicitar una cita</strong>
+
                 <span>Agenda una nueva consulta médica</span>
               </div>
             </Link>
@@ -79,6 +195,7 @@ export default function PatientDashboard() {
 
               <div>
                 <strong>Mis citas</strong>
+
                 <span>Consulta y administra tus citas</span>
               </div>
             </Link>
@@ -102,17 +219,20 @@ export default function PatientDashboard() {
           <div className="dashboard-summary">
             <div className="summary-card">
               <span>Próximas citas</span>
-              <strong>2</strong>
+
+              <strong>{activeAppointments.length}</strong>
             </div>
 
             <div className="summary-card">
               <span>Citas pendientes</span>
-              <strong>1</strong>
+
+              <strong>{pendingAppointments.length}</strong>
             </div>
 
             <div className="summary-card">
               <span>Citas atendidas</span>
-              <strong>5</strong>
+
+              <strong>{completedAppointments.length}</strong>
             </div>
           </div>
         </section>

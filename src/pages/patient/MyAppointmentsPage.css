@@ -224,6 +224,26 @@
   color: #334155 !important;
 }
 
+.back-appointments-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 22px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #64748b;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.back-appointments-button:hover {
+  color: #2563eb;
+}
+
 @media (max-width: 640px) {
   .my-appointments-page {
     padding: 24px 12px;

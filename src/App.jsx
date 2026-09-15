@@ -8,6 +8,7 @@ import Register from './pages/auth/Register';
 import PatientDashboard from './pages/patient/PatientDashboard';
 import DoctorSchedule from "./pages/doctor/DoctorSchedulePage";
 import AdminDashboard from './pages/admin/AdminDashboard';
+import BookAppointmentPage from './pages/patient/BookAppointmentPage';
 
 export default function App() {
   return (
@@ -21,7 +22,8 @@ export default function App() {
 
         {/* Rutas del Paciente */}
         <Route path="/paciente/inicio" element={<PatientDashboard />} />
-
+        <Route path="/paciente/reservar-cita" element={<BookAppointmentPage />} />
+        
         {/* Rutas del Médico */}
         <Route path="/medico/agenda" element={<DoctorSchedule />} />
 

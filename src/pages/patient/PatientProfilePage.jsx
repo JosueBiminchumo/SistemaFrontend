@@ -31,6 +31,12 @@ function getProfile() {
 export default function PatientProfilePage() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(getProfile);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
+  const fullName = `${profile.firstName} ${profile.lastName}`;
+
+  const initials = `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`;
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -58,6 +64,12 @@ export default function PatientProfilePage() {
     });
   };
 
+  const handleCancel = () => {
+    setProfile(getProfile());
+    setCurrentPassword('');
+    setNewPassword('');
+  };
+
   return (
     <main className="patient-profile-page">
       <section className="patient-profile-container">
@@ -69,126 +81,185 @@ export default function PatientProfilePage() {
           ← Volver
         </button>
 
-        <div className="patient-profile-header">
-          <div className="profile-avatar">
-            {profile.firstName.charAt(0)}
-            {profile.lastName.charAt(0)}
-          </div>
-
-          <div>
-            <h1>Mi perfil</h1>
-            <p>Administra tu información personal.</p>
-          </div>
+        <div className="profile-header">
+          <h1>Mi perfil</h1>
+          <p>Gestiona tu información personal</p>
         </div>
 
-        <form
-          className="patient-profile-form"
-          onSubmit={handleSubmit}
-        >
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="first-name">Nombres</label>
-              <input
-                id="first-name"
-                name="firstName"
-                type="text"
-                value={profile.firstName}
-                onChange={handleChange}
-                required
-              />
+        <div className="profile-layout">
+          <div className="profile-card">
+            <div className="profile-avatar">
+              {initials}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="last-name">Apellidos</label>
-              <input
-                id="last-name"
-                name="lastName"
-                type="text"
-                value={profile.lastName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
+            <p className="profile-name">
+              {fullName}
+            </p>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="document">
-                Documento de identidad
-              </label>
+            <p className="profile-role">
+              Paciente
+            </p>
 
-              <input
-                id="document"
-                name="document"
-                type="text"
-                value={profile.document}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="birth-date">
-                Fecha de nacimiento
-              </label>
-
-              <input
-                id="birth-date"
-                name="birthDate"
-                type="date"
-                value={profile.birthDate}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="phone">Teléfono</label>
-
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                value={profile.phone}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="email">Correo electrónico</label>
-
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={profile.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="address">Dirección</label>
-
-            <input
-              id="address"
-              name="address"
-              type="text"
-              value={profile.address}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="profile-actions">
-            <button type="submit" className="save-profile-button">
-              Guardar cambios
+            <button
+              type="button"
+              className="change-photo"
+            >
+              Cambiar foto
             </button>
           </div>
-        </form>
+
+          <form
+            className="form-card"
+            onSubmit={handleSubmit}
+          >
+            <h2>Información personal</h2>
+
+            <div className="profile-form-row">
+              <div className="profile-field">
+                <label htmlFor="full-name">
+                  Nombre completo
+                </label>
+
+                <input
+                  id="full-name"
+                  type="text"
+                  value={fullName}
+                  readOnly
+                />
+              </div>
+
+              <div className="profile-field">
+                <label htmlFor="document">
+                  DNI
+                </label>
+
+                <input
+                  id="document"
+                  name="document"
+                  type="text"
+                  value={profile.document}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="profile-form-row">
+              <div className="profile-field">
+                <label htmlFor="birth-date">
+                  Fecha de nacimiento
+                </label>
+
+                <input
+                  id="birth-date"
+                  name="birthDate"
+                  type="date"
+                  value={profile.birthDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="profile-field">
+                <label htmlFor="phone">
+                  Teléfono
+                </label>
+
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={profile.phone}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="profile-form-row">
+              <div className="profile-field">
+                <label htmlFor="email">
+                  Correo electrónico
+                </label>
+
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={profile.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <hr className="profile-divider" />
+
+            <h2>Cambiar contraseña</h2>
+
+            <div className="profile-form-row">
+              <div className="profile-field">
+                <label htmlFor="current-password">
+                  Contraseña actual
+                </label>
+
+                <input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(event) =>
+                    setCurrentPassword(event.target.value)
+                  }
+                />
+              </div>
+
+              <div className="profile-field">
+                <label htmlFor="new-password">
+                  Nueva contraseña
+                </label>
+
+                <input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(event) =>
+                    setNewPassword(event.target.value)
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="profile-actions">
+              <button
+                type="submit"
+                className="save-profile-button"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+
+                Guardar cambios
+              </button>
+
+              <button
+                type="button"
+                className="cancel-profile-button"
+                onClick={handleCancel}
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
       </section>
     </main>
   );

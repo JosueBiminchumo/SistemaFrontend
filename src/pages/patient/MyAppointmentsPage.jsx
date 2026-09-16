@@ -4,59 +4,37 @@ import Swal from 'sweetalert2';
 import AppointmentCard from '../../components/appointments/AppointmentCard';
 import './MyAppointmentsPage.css';
 
-const initialAppointments = [
-  {
-    id: 1,
-    doctor: 'Dr. Carlos Ramírez',
-    specialty: 'Medicina General',
-    date: '20 de septiembre de 2026',
-    time: '09:00',
-    status: 'confirmed',
-  },
-  {
-    id: 2,
-    doctor: 'Dra. María López',
-    specialty: 'Cardiología',
-    date: '25 de septiembre de 2026',
-    time: '15:00',
-    status: 'pending',
-  },
-];
-
 function getAppointments() {
   const storedAppointments = localStorage.getItem('appointments');
 
-  if (storedAppointments) {
-    return JSON.parse(storedAppointments);
+  if (!storedAppointments) {
+    return [];
   }
 
-  localStorage.setItem(
-    'appointments',
-    JSON.stringify(initialAppointments)
-  );
-
-  return initialAppointments;
+  return JSON.parse(storedAppointments);
 }
 
 export default function MyAppointmentsPage() {
   const [appointments, setAppointments] = useState(getAppointments);
+  const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   const handleCancel = (id) => {
-    Swal.fire({
-      title: '¿Cancelar esta cita?',
-      text: 'La cita pasará a estado cancelada.',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Cancelar cita',
-      cancelButtonText: 'Volver',
-      reverseButtons: true,
-      confirmButtonColor: '#2563eb',
-      cancelButtonColor: '#e2e8f0',
-      customClass: {
-        cancelButton: 'swal-cancel-button',
-      },
-    }).then((result) => {
+  Swal.fire({
+    title: '¿Estás seguro de que deseas cancelar esta cita?',
+    text: 'Esta acción no se puede deshacer.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Confirmar',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true,
+    confirmButtonColor: '#2563eb',
+    cancelButtonColor: '#e2e8f0',
+    customClass: {
+      cancelButton: 'swal-cancel-button',
+    },
+  }).then((result) => {
       if (!result.isConfirmed) {
         return;
       }
@@ -85,6 +63,20 @@ export default function MyAppointmentsPage() {
     });
   };
 
+  const filteredAppointments = appointments.filter((appointment) => {
+    const matchesFilter =
+      filter === 'all' || appointment.status === filter;
+
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch =
+      appointment.doctor?.toLowerCase().includes(search) ||
+      appointment.specialty?.toLowerCase().includes(search) ||
+      appointment.reason?.toLowerCase().includes(search);
+
+    return matchesFilter && matchesSearch;
+  });
+
   return (
     <main className="my-appointments-page">
       <section className="my-appointments-container">
@@ -99,26 +91,110 @@ export default function MyAppointmentsPage() {
         <div className="my-appointments-header">
           <div>
             <h1>Mis citas</h1>
-            <p>Consulta y gestiona tus citas médicas.</p>
+            <p>Gestiona tus citas médicas</p>
           </div>
 
           <Link
             to="/paciente/reservar-cita"
             className="new-appointment-button"
           >
-            Nueva cita
+            + Nueva cita
           </Link>
         </div>
 
-        <div className="appointments-list">
-          {appointments.map((appointment) => (
-            <AppointmentCard
-              key={appointment.id}
-              appointment={appointment}
-              onCancel={handleCancel}
+        <div className="appointments-toolbar">
+          <div className="search-box">
+            <span className="search-icon">🔍</span>
+
+            <input
+              type="text"
+              placeholder="Buscar por médico o especialidad..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
             />
-          ))}
+          </div>
+
+          <div className="filter-tabs">
+            <button
+              type="button"
+              className={`tab-btn ${
+                filter === 'all' ? 'active' : ''
+              }`}
+              onClick={() => setFilter('all')}
+            >
+              Todas
+            </button>
+
+            <button
+              type="button"
+              className={`tab-btn ${
+                filter === 'pending' ? 'active' : ''
+              }`}
+              onClick={() => setFilter('pending')}
+            >
+              Pendiente
+            </button>
+
+            <button
+              type="button"
+              className={`tab-btn ${
+                filter === 'confirmed' ? 'active' : ''
+              }`}
+              onClick={() => setFilter('confirmed')}
+            >
+              Confirmada
+            </button>
+
+            <button
+              type="button"
+              className={`tab-btn ${
+                filter === 'completed' ? 'active' : ''
+              }`}
+              onClick={() => setFilter('completed')}
+            >
+              Completada
+            </button>
+
+            <button
+              type="button"
+              className={`tab-btn ${
+                filter === 'cancelled' ? 'active' : ''
+              }`}
+              onClick={() => setFilter('cancelled')}
+            >
+              Cancelada
+            </button>
+          </div>
         </div>
+
+        {filteredAppointments.length > 0 ? (
+          <div className="appointments-list">
+            {[...filteredAppointments].reverse().map((appointment) => (
+              <AppointmentCard
+                key={appointment.id}
+                appointment={appointment}
+                onCancel={handleCancel}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="empty-appointments">
+            <div className="empty-icon">📅</div>
+
+            <h3>No hay citas</h3>
+
+            <p>
+              No se encontraron citas con los filtros aplicados.
+            </p>
+
+            <Link
+              to="/paciente/reservar-cita"
+              className="btn-empty-book"
+            >
+              + Reservar cita
+            </Link>
+          </div>
+        )}
       </section>
     </main>
   );

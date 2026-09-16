@@ -207,6 +207,26 @@
   background-color: #fef2f2;
 }
 
+.observations-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.observations-section h3 {
+  margin: 0 0 8px;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.observations-section p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 @media (max-width: 640px) {
   .appointment-detail-page {
     padding: 24px 12px;

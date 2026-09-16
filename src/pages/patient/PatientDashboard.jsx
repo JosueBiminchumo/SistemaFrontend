@@ -16,8 +16,8 @@ function getProfile() {
 
   if (!storedProfile) {
     return {
-      firstName: 'Juan',
-      lastName: 'Pérez',
+      firstName: 'María',
+      lastName: 'García',
     };
   }
 
@@ -33,7 +33,13 @@ function formatDate(date) {
     return date;
   }
 
-  const [year, month, day] = date.split('-');
+  const parts = date.split('-');
+
+  if (parts.length !== 3) {
+    return date;
+  }
+
+  const [year, month, day] = parts;
 
   const months = [
     'enero',
@@ -56,19 +62,18 @@ function formatDate(date) {
 export default function PatientDashboard() {
   const profile = getProfile();
   const appointments = getAppointments();
+  const recentAppointments = [...appointments].reverse();
 
-  const activeAppointments = appointments.filter(
+  const activeAppointments = recentAppointments.filter(
     (appointment) => appointment.status !== 'cancelled'
   );
 
   const nextAppointment = activeAppointments[0];
 
-  const pendingAppointments = appointments.filter(
-    (appointment) => appointment.status === 'pending'
-  );
-
-  const completedAppointments = appointments.filter(
-    (appointment) => appointment.status === 'completed'
+  const completedAppointments = recentAppointments.filter(
+    (appointment) =>
+      appointment.status === 'completed' ||
+      appointment.status === 'atendida'
   );
 
   return (
@@ -76,166 +81,253 @@ export default function PatientDashboard() {
       <section className="patient-dashboard-container">
         <div className="patient-dashboard-header">
           <div>
-            <span className="patient-dashboard-label">
-              Portal del paciente
-            </span>
+            <h1>¡Hola, {profile.firstName}! 👋</h1>
+            <p>Aquí tienes un resumen de tu salud.</p>
+          </div>
+        </div>
 
-            <h1>¡Hola, {profile.firstName}!</h1>
+        <div className="dashboard-summary">
+          <div className="summary-card">
+            <div className="summary-card-icon calendar-icon">📅</div>
 
-            <p>Gestiona tus citas y consulta tu información médica.</p>
+            <div>
+              <span>CITAS PROGRAMADAS</span>
+              <strong>{activeAppointments.length}</strong>
+              <small>Próximas citas</small>
+            </div>
           </div>
 
-          <Link to="/paciente/perfil" className="profile-button">
-            Mi perfil
-          </Link>
+          <div className="summary-card">
+            <div className="summary-card-icon check-icon">✅</div>
+
+            <div>
+              <span>CITAS COMPLETADAS</span>
+              <strong>{completedAppointments.length}</strong>
+              <small>Total histórico</small>
+            </div>
+          </div>
+
+          <div className="summary-card">
+            <div className="summary-card-icon pulse-icon">🫀</div>
+
+            <div>
+              <span>PRÓXIMA CITA</span>
+
+              <strong>
+                {nextAppointment
+                  ? nextAppointment.date
+                  : 'Sin programar'}
+              </strong>
+
+              <small>
+                {nextAppointment
+                  ? nextAppointment.time || '09:00'
+                  : '--:--'}
+              </small>
+            </div>
+          </div>
         </div>
 
         {nextAppointment ? (
-          <section className="next-appointment-card">
-            <div className="next-appointment-header">
-              <div>
-                <span>PRÓXIMA CITA</span>
+          <section className="next-appt">
+            <div className="next-appt-content">
+              <p className="next-appt-label">Próxima cita</p>
 
-                <h2>{nextAppointment.doctor}</h2>
+              <h3>{nextAppointment.doctor}</h3>
 
-                <p>{nextAppointment.specialty}</p>
-              </div>
+              <p className="next-appt-specialty">
+                {nextAppointment.specialty}
+              </p>
 
-              <span className="appointment-status">
-                {nextAppointment.status === 'confirmed'
-                  ? 'Confirmada'
-                  : nextAppointment.status === 'pending'
-                    ? 'Pendiente'
-                    : nextAppointment.status === 'completed'
-                      ? 'Atendida'
-                      : 'Pendiente'}
-              </span>
-            </div>
+              <div className="next-appt-datetime">
+                <span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <rect
+                      x="3"
+                      y="4"
+                      width="18"
+                      height="18"
+                      rx="2"
+                    />
+                    <path d="M16 2v4M8 2v4M3 10h18" />
+                  </svg>
 
-            <div className="appointment-details">
-              <div className="appointment-detail">
-                <span>Fecha</span>
-
-                <strong>
                   {formatDate(nextAppointment.date)}
-                </strong>
+                </span>
+
+                <span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
+                  </svg>
+
+                  {nextAppointment.time || '09:00'}
+                </span>
               </div>
 
-              <div className="appointment-detail">
-                <span>Hora</span>
+              <div className="next-appt-actions">
+                <Link
+                  to={`/paciente/cita/${nextAppointment.id}`}
+                  className="next-appt-detail"
+                >
+                  Ver detalle
+                </Link>
 
-                <strong>{nextAppointment.time}</strong>
-              </div>
-
-              <div className="appointment-detail">
-                <span>Modalidad</span>
-
-                <strong>Presencial</strong>
+                {nextAppointment.status !== 'completed' &&
+                  nextAppointment.status !== 'atendida' && (
+                    <Link
+                      to={`/paciente/cita/${nextAppointment.id}/reprogramar`}
+                      className="next-appt-reschedule"
+                    >
+                      Reprogramar
+                    </Link>
+                  )}
               </div>
             </div>
 
-            <div className="next-appointment-actions">
-              <Link
-                to={`/paciente/cita/${nextAppointment.id}`}
+            <div className="next-appt-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                Ver detalle
-              </Link>
-
-              {nextAppointment.status !== 'completed' && (
-                <Link
-                  to={`/paciente/cita/${nextAppointment.id}/reprogramar`}
-                >
-                  Reprogramar
-                </Link>
-              )}
+                <path d="M11 2v6" />
+                <path d="M15 2v6" />
+                <path d="M9 8h8a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5v0" />
+                <path d="M14 17v2a2 2 0 0 1-2 2h0a2 2 0 0 1-2-2v-2" />
+                <circle cx="20" cy="10" r="2" />
+              </svg>
             </div>
           </section>
         ) : (
-          <section className="next-appointment-card">
-            <div className="next-appointment-header">
-              <div>
-                <span>PRÓXIMA CITA</span>
+          <section className="next-appt">
+            <div className="next-appt-content">
+              <p className="next-appt-label">Próxima cita</p>
 
-                <h2>No tienes citas próximas</h2>
+              <h3>No tienes citas próximas</h3>
 
-                <p>
-                  Puedes reservar una nueva cita cuando lo necesites.
-                </p>
+              <p className="next-appt-specialty">
+                Puedes reservar una nueva cita cuando lo necesites.
+              </p>
+
+              <div className="next-appt-actions">
+                <Link
+                  to="/paciente/reservar-cita"
+                  className="next-appt-detail"
+                >
+                  Reservar cita
+                </Link>
               </div>
             </div>
 
-            <div className="next-appointment-actions">
-              <Link to="/paciente/reservar-cita">
-                Reservar cita
-              </Link>
+            <div className="next-appt-icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M11 2v6" />
+                <path d="M15 2v6" />
+                <path d="M9 8h8a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5v0" />
+                <path d="M14 17v2a2 2 0 0 1-2 2h0a2 2 0 0 1-2-2v-2" />
+                <circle cx="20" cy="10" r="2" />
+              </svg>
             </div>
           </section>
         )}
 
         <section className="patient-dashboard-section">
-          <div className="section-title">
-            <h2>¿Qué deseas hacer?</h2>
+          <div className="section-title-row">
+            <h2>Citas recientes</h2>
 
-            <p>Accede rápidamente a las opciones de tu cuenta.</p>
+            <Link
+              to="/paciente/mis-citas"
+              className="ver-todas-link"
+            >
+              Ver todas &gt;
+            </Link>
           </div>
 
-          <div className="patient-dashboard-actions">
-            <Link to="/paciente/reservar-cita" className="dashboard-action">
-              <span className="dashboard-action-icon">+</span>
+          <div className="recent-appointments-list">
+            {recentAppointments.length > 0 ? (
+              recentAppointments
+                .slice(0, 3)
+                .map((appt) => (
+                  <div
+                    key={appt.id || appt.date}
+                    className="recent-appointment-item"
+                  >
+                    <div className="appt-info-left">
+                      <span className="stethoscope-icon">
+                        🩺
+                      </span>
 
-              <div>
-                <strong>Solicitar una cita</strong>
+                      <div>
+                        <strong>{appt.doctor}</strong>
 
-                <span>Agenda una nueva consulta médica</span>
-              </div>
-            </Link>
+                        <p>
+                          {appt.specialty} ·{' '}
+                          {formatDate(appt.date)} {appt.time}
+                        </p>
+                      </div>
+                    </div>
 
-            <Link to="/paciente/mis-citas" className="dashboard-action">
-              <span className="dashboard-action-icon">✓</span>
-
-              <div>
-                <strong>Mis citas</strong>
-
-                <span>Consulta y administra tus citas</span>
-              </div>
-            </Link>
-
-            <Link to="/paciente/perfil" className="dashboard-action">
-              <span className="dashboard-action-icon">◯</span>
-
-              <div>
-                <strong>Mi perfil</strong>
-                <span>Actualiza tus datos personales</span>
-              </div>
-            </Link>
+                    <div>
+                      <span
+                        className={`status-badge ${appt.status}`}
+                      >
+                        •{' '}
+                        {appt.status === 'confirmed'
+                          ? 'Confirmada'
+                          : appt.status === 'completed' ||
+                            appt.status === 'atendida'
+                          ? 'Completada'
+                          : appt.status === 'pending'
+                          ? 'Pendiente'
+                          : appt.status === 'cancelled'
+                          ? 'Cancelada'
+                          : 'Pendiente'}
+                      </span>
+                    </div>
+                  </div>
+                ))
+            ) : (
+              <p className="no-appointments-text">
+                No hay citas recientes registradas.
+              </p>
+            )}
           </div>
         </section>
 
-        <section className="patient-dashboard-section">
-          <div className="section-title">
-            <h2>Resumen</h2>
+        <div className="dashboard-reminder-banner">
+          <span className="reminder-icon">🔔</span>
+
+          <div>
+            <strong>Recordatorio</strong>
+
+            <p>
+              Llega 10 minutos antes de tu cita y trae tu DNI.
+              En caso de cancelación, hazlo con al menos 24
+              horas de anticipación.
+            </p>
           </div>
-
-          <div className="dashboard-summary">
-            <div className="summary-card">
-              <span>Próximas citas</span>
-
-              <strong>{activeAppointments.length}</strong>
-            </div>
-
-            <div className="summary-card">
-              <span>Citas pendientes</span>
-
-              <strong>{pendingAppointments.length}</strong>
-            </div>
-
-            <div className="summary-card">
-              <span>Citas atendidas</span>
-
-              <strong>{completedAppointments.length}</strong>
-            </div>
-          </div>
-        </section>
+        </div>
       </section>
     </main>
   );

@@ -6,7 +6,8 @@ const statusLabels = {
   confirmed: 'Confirmada',
   pending: 'Pendiente',
   cancelled: 'Cancelada',
-  completed: 'Atendida',
+  completed: 'Completada',
+  atendida: 'Completada',
 };
 
 export default function AppointmentDetailPage() {
@@ -105,7 +106,7 @@ export default function AppointmentDetailPage() {
 
         <div className="appointment-detail-header">
           <div>
-            <h1>Detalle de la cita</h1>
+            <h1>Detalle de cita</h1>
             <p>Información de tu cita médica.</p>
           </div>
 
@@ -116,12 +117,20 @@ export default function AppointmentDetailPage() {
 
         <section className="doctor-section">
           <div className="doctor-avatar">
-            {appointment.doctor
-              .split(' ')
-              .filter((word) => word.length > 0)
-              .slice(0, 2)
-              .map((word) => word[0])
-              .join('')}
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M11 2v6" />
+              <path d="M15 2v6" />
+              <path d="M9 8h8a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5v0" />
+              <path d="M14 17v2a2 2 0 0 1-2 2h0a2 2 0 0 1-2-2v-2" />
+              <circle cx="20" cy="10" r="2" />
+            </svg>
           </div>
 
           <div>
@@ -161,8 +170,18 @@ export default function AppointmentDetailPage() {
           </p>
         </section>
 
+        <section className="observations-section">
+          <h3>Observaciones</h3>
+
+          <p>
+            {appointment.observations ||
+              'No se registraron observaciones para esta cita.'}
+          </p>
+        </section>
+
         {appointment.status !== 'cancelled' &&
-          appointment.status !== 'completed' && (
+          appointment.status !== 'completed' &&
+          appointment.status !== 'atendida' && (
             <div className="detail-actions">
               <button
                 type="button"

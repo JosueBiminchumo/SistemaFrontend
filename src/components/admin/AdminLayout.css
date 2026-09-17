@@ -70,6 +70,7 @@
 
 .admin-user-card__avatar {
   display: grid;
+  flex-shrink: 0;
   width: 38px;
   height: 38px;
   place-items: center;
@@ -141,6 +142,10 @@
   cursor: pointer;
 }
 
+.admin-logout:hover {
+  background: #fff7f7;
+}
+
 .admin-workspace {
   display: flex;
   flex: 1;
@@ -181,6 +186,10 @@
   font-size: 13px;
 }
 
+.admin-search input::placeholder {
+  color: #667085;
+}
+
 .admin-topbar__account {
   display: flex;
   align-items: center;
@@ -194,11 +203,17 @@
   display: grid;
   width: 34px;
   height: 34px;
+  padding: 0;
   place-items: center;
   border: 0;
+  border-radius: 9px;
   background: transparent;
   color: #52525b;
   cursor: pointer;
+}
+
+.admin-notification:hover {
+  background: #f2f4f7;
 }
 
 .admin-notification span {
@@ -210,6 +225,24 @@
   border: 2px solid #ffffff;
   border-radius: 50%;
   background: #ef4444;
+}
+
+.admin-account-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 7px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #27272a;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.admin-account-button:hover {
+  background: #f2f4f7;
 }
 
 .admin-topbar__avatar {
@@ -245,7 +278,7 @@
   .admin-brand > div:last-child,
   .admin-user-card > div:last-child,
   .admin-menu__link span,
-  .admin-logout {
+  .admin-logout span {
     display: none;
   }
 
@@ -256,6 +289,11 @@
   }
 
   .admin-menu__link {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .admin-logout {
     justify-content: center;
     padding: 0;
   }
@@ -285,7 +323,7 @@
     width: 180px;
   }
 
-  .admin-topbar__account > span {
+  .admin-account-button > span {
     display: none;
   }
 }

@@ -18,6 +18,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import SpecialtiesManagementPage from './pages/admin/SpecialtiesManagementPage';
 import AppointmentsManagementPage from './pages/admin/AppointmentsManagementPage';
 import StatisticsPage from './pages/admin/StatisticsPage';
+import AdminProfilePage from './pages/admin/AdminProfilePage';
 
 function ApplicationRoutes() {
   const location = useLocation();
@@ -75,6 +76,11 @@ function ApplicationRoutes() {
           <Route
             path="estadisticas"
             element={<StatisticsPage />}
+          />
+
+          <Route
+            path="perfil"
+            element={<AdminProfilePage />}
           />
         </Route>
 

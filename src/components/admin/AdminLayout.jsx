@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+
 import {
   Bell,
   CalendarDays,
@@ -114,7 +115,7 @@ export default function AdminLayout() {
           onClick={handleLogout}
         >
           <LogOut size={18} />
-          Cerrar sesión
+          <span>Cerrar sesión</span>
         </button>
       </aside>
 
@@ -122,6 +123,7 @@ export default function AdminLayout() {
         <header className="admin-topbar">
           <label className="admin-search">
             <Search size={18} />
+
             <input
               type="search"
               placeholder="Buscar..."
@@ -139,8 +141,15 @@ export default function AdminLayout() {
               <span />
             </button>
 
-            <div className="admin-topbar__avatar">AM</div>
-            <span>Admin</span>
+            <button
+              type="button"
+              className="admin-account-button"
+              onClick={() => navigate('/admin/perfil')}
+              aria-label="Abrir perfil del administrador"
+            >
+              <div className="admin-topbar__avatar">AM</div>
+              <span>Admin</span>
+            </button>
           </div>
         </header>
 

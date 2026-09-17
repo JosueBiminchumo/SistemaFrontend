@@ -1,7 +1,8 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
-import Footer from './components/layout/Footer';
+
 
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -28,13 +29,8 @@ export default function App() {
         {/* Rutas del Administrador */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
-        {/* Ruta para manejar errores 404 (prueba temporal de Footer) */}
-        <Route path="*" element={
-          <div>
-            <h2 style={{ padding: '20px' }}>404 - Página no encontrada</h2>
-            <Footer />
-          </div>
-        } />
+        {/* Ruta para manejar errores 404 */}
+        <Route path="*" element={<h2>404 - Página no encontrada</h2>} />
       </Routes>
     </BrowserRouter>
   );

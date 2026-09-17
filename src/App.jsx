@@ -17,6 +17,7 @@ import DoctorSchedule from './pages/doctor/DoctorSchedulePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import SpecialtiesManagementPage from './pages/admin/SpecialtiesManagementPage';
 import AppointmentsManagementPage from './pages/admin/AppointmentsManagementPage';
+import StatisticsPage from './pages/admin/StatisticsPage';
 
 function ApplicationRoutes() {
   const location = useLocation();
@@ -69,6 +70,11 @@ function ApplicationRoutes() {
           <Route
             path="citas"
             element={<AppointmentsManagementPage />}
+          />
+
+          <Route
+            path="estadisticas"
+            element={<StatisticsPage />}
           />
         </Route>
 

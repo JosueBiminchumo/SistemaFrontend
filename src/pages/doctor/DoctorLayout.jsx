@@ -4,7 +4,7 @@ import { getProfile } from './doctorStorage';
 import './DoctorLayout.css';
 
 const navItems = [
-  { path: '/medico/dashboard', label: 'Inicio', icon: '⬚' },
+  { path: '/medico/dashboard', label: 'Inicio', icon: '🏠' },
   { path: '/medico/agenda', label: 'Mi agenda', icon: '📅' },
   { path: '/medico/citas', label: 'Citas', icon: '🗂️' },
   { path: '/medico/perfil', label: 'Mi perfil', icon: '👤' },

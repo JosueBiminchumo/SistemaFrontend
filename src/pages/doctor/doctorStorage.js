@@ -13,7 +13,6 @@ export function todayISO(offsetDays = 0) {
   return d.toISOString().slice(0, 10);
 }
 
-// Datos iniciales — solo se usan la PRIMERA vez que no hay nada en localStorage
 const seedSchedule = [
   { id: 1, day: 'Lunes', startTime: '09:00', endTime: '13:00' },
   { id: 2, day: 'Lunes', startTime: '15:00', endTime: '18:00' },

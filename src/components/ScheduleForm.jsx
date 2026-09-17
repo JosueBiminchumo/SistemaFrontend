@@ -44,32 +44,18 @@ export default function ScheduleForm({ onAdd, onCancel }) {
 
         <div className="schedule-form__field">
           <label htmlFor="startTime">Desde</label>
-          <input
-            id="startTime"
-            type="time"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-          />
+          <input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
         </div>
 
         <div className="schedule-form__field">
           <label htmlFor="endTime">Hasta</label>
-          <input
-            id="endTime"
-            type="time"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-          />
+          <input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
         </div>
       </div>
 
       <div className="schedule-form__actions">
-        <button type="button" className="btn btn--ghost" onClick={onCancel}>
-          Cancelar
-        </button>
-        <button type="submit" className="btn btn--primary">
-          Guardar horario
-        </button>
+        <button type="button" className="btn btn--ghost" onClick={onCancel}>Cancelar</button>
+        <button type="submit" className="btn btn--primary">Guardar horario</button>
       </div>
     </form>
   );

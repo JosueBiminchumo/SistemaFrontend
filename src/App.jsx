@@ -13,8 +13,10 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import PatientDashboard from './pages/patient/PatientDashboard';
 import DoctorSchedule from './pages/doctor/DoctorSchedulePage';
+
 import AdminDashboard from './pages/admin/AdminDashboard';
 import SpecialtiesManagementPage from './pages/admin/SpecialtiesManagementPage';
+import AppointmentsManagementPage from './pages/admin/AppointmentsManagementPage';
 
 function ApplicationRoutes() {
   const location = useLocation();
@@ -62,6 +64,11 @@ function ApplicationRoutes() {
           <Route
             path="especialidades"
             element={<SpecialtiesManagementPage />}
+          />
+
+          <Route
+            path="citas"
+            element={<AppointmentsManagementPage />}
           />
         </Route>
 

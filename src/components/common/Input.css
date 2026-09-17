@@ -1,0 +1,40 @@
+.input-group {
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+  color: var(--color-text-body);
+  font-size: 14px;
+}
+
+.input-required {
+  color: var(--color-danger);
+}
+
+.input-group input {
+  padding: 14px 15px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.input-group input:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus);
+}
+
+.input-group input.input-error {
+  border-color: var(--color-danger);
+}
+
+.input-error-text {
+  margin-top: var(--spacing-xs);
+  color: var(--color-danger);
+  font-size: 13px;
+}

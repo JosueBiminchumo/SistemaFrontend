@@ -1,3 +1,4 @@
+import Input from './components/common/Input';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
@@ -26,10 +27,23 @@ export default function App() {
         <Route path="/medico/agenda" element={<DoctorSchedule />} />
 
         {/* Rutas del Administrador */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
-        {/* Ruta para manejar errores 404 */}
-        <Route path="*" element={<h2>404 - Página no encontrada</h2>} />
+        <Route path="*" element={
+          <div style={{ padding: '40px', maxWidth: '400px' }}>
+            <h2>404 - Página no encontrada</h2>
+            <Input
+              label="Correo electrónico"
+              name="email"
+              placeholder="correo@ejemplo.com"
+              required
+            />
+            <Input
+              label="Contraseña"
+              name="password"
+              type="password"
+              error="Este campo es obligatorio"
+            />
+          </div>
+        } />
       </Routes>
     </BrowserRouter>
   );

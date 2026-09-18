@@ -7,7 +7,7 @@ export default function AppointmentCard({ appointment, onCancel }) {
     appointment.status === 'confirmed';
 
   return (
-    <article className="card">
+    <article className="appointment-card">
       <div className="avatar">
         <svg
           viewBox="0 0 24 24"

@@ -67,3 +67,19 @@ export const saveAppointments = (appointments) => writeToStorage(STORAGE_KEYS.AP
 
 export const getProfile = () => readFromStorage(STORAGE_KEYS.PROFILE, seedProfile);
 export const saveProfile = (profile) => writeToStorage(STORAGE_KEYS.PROFILE, profile);
+export function getPatientsSummary() {
+  const appointments = getAppointments();
+  const map = new Map();
+
+  appointments.forEach((appt) => {
+    if (!map.has(appt.patientName)) {
+      map.set(appt.patientName, { name: appt.patientName, total: 0, lastDate: appt.date, statuses: [] });
+    }
+    const entry = map.get(appt.patientName);
+    entry.total += 1;
+    entry.statuses.push(appt.status);
+    if (appt.date > entry.lastDate) entry.lastDate = appt.date;
+  });
+
+  return Array.from(map.values()).sort((a, b) => b.lastDate.localeCompare(a.lastDate));
+}

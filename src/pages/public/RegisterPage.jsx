@@ -4,7 +4,27 @@ import './PublicPages.css';
 
 export default function RegisterPage() {
   const handleRegister = (patient) => {
-    localStorage.setItem('mediturn_registered_patient', JSON.stringify(patient));
+    const patients = JSON.parse(
+      localStorage.getItem('patients') || '[]'
+    );
+
+    const newPatient = {
+      ...patient,
+      id:
+        patients.length > 0
+          ? Math.max(
+              ...patients.map((currentPatient) => currentPatient.id)
+            ) + 1
+          : 1,
+    };
+
+    patients.push(newPatient);
+
+    localStorage.setItem('patients', JSON.stringify(patients));
+    localStorage.setItem(
+      'mediturn_registered_patient',
+      JSON.stringify(newPatient)
+    );
   };
 
   return (

@@ -85,6 +85,7 @@ export default function RegisterForm({ onRegister }) {
       documentNumber: values.documentNumber.trim(),
       phone: values.phone.trim(),
       email: values.email.trim().toLowerCase(),
+      password: values.password,
       role: 'paciente',
     };
 

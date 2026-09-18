@@ -94,11 +94,28 @@ export default function LoginForm({ onLogin }) {
       return;
     }
 
-    const user = testUsers.find(
-      (testUser) =>
-        testUser.email === values.email.trim().toLowerCase() &&
-        testUser.password === values.password
+    const email = values.email.trim().toLowerCase();
+
+    const registeredPatient = JSON.parse(
+      localStorage.getItem('mediturn_registered_patient') || 'null'
     );
+
+    const user =
+      registeredPatient &&
+      registeredPatient.email === email &&
+      registeredPatient.password === values.password
+        ? {
+            id: registeredPatient.id,
+            name: `${registeredPatient.firstName} ${registeredPatient.lastName}`,
+            email: registeredPatient.email,
+            role: registeredPatient.role,
+            dashboardPath: '/paciente',
+          }
+        : testUsers.find(
+            (testUser) =>
+              testUser.email === email &&
+              testUser.password === values.password
+          );
 
     if (!user) {
       setErrors({

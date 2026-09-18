@@ -7,6 +7,7 @@ const navItems = [
   { path: '/medico/dashboard', label: 'Inicio', icon: '⬚' },
   { path: '/medico/agenda', label: 'Mi agenda', icon: '📅' },
   { path: '/medico/citas', label: 'Citas', icon: '🗂️' },
+  { path: '/medico/pacientes', label: 'Pacientes', icon: '🧑‍🤝‍🧑' },
   { path: '/medico/perfil', label: 'Mi perfil', icon: '👤' },
 ];
 
@@ -49,7 +50,7 @@ export default function DoctorLayout({ children }) {
             <Link
               key={item.path}
               to={item.path}
-              className={`doctor-layout__nav-item ${location.pathname === item.path ? 'doctor-layout__nav-item--active' : ''}`}
+              className={`doctor-layout__nav-item ${location.pathname.startsWith(item.path) ? 'doctor-layout__nav-item--active' : ''}`}
               title={collapsed ? item.label : undefined}
             >
               <span className="doctor-layout__nav-icon">{item.icon}</span>

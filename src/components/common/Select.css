@@ -1,0 +1,42 @@
+.select-group {
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.select-group label {
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+  color: var(--color-text-body);
+  font-size: 14px;
+}
+
+.select-required {
+  color: var(--color-danger);
+}
+
+.select-group select {
+  padding: 14px 15px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  outline: none;
+  background: var(--color-white);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.select-group select:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus);
+}
+
+.select-group select.select-error {
+  border-color: var(--color-danger);
+}
+
+.select-error-text {
+  margin-top: var(--spacing-xs);
+  color: var(--color-danger);
+  font-size: 13px;
+}

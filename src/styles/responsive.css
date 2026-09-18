@@ -1,0 +1,27 @@
+/* Breakpoints de referencia:
+   Celular:  hasta 480px
+   Tablet:   481px - 768px
+   Desktop:  769px en adelante
+*/
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    border-radius: var(--radius-md);
+  }
+}

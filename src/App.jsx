@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
 
-
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import PatientDashboard from './pages/patient/PatientDashboard';

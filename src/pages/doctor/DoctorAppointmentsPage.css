@@ -4,10 +4,10 @@
   --da-text-muted: #64748b;
   --da-border: #e2e8f0;
   --da-bg-card: #ffffff;
-
-  max-width: 1100px;
+  
+ max-width: 1100px;
   margin: 0 auto;
-  padding: 32px 24px 60px;
+  padding: 40px 32px 60px;   /* antes: 32px 24px 60px */
   color: var(--da-text);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }

@@ -115,7 +115,7 @@ export default function MyAppointmentsPage() {
             to="/paciente/reservar-cita"
             className="new-appointment-button"
           >
-            + Nueva cita
+            Nueva cita
           </Link>
         </div>
 

@@ -6,20 +6,20 @@
 }
 
 .patient-sidebar {
-  width: 280px;
-  background: rgba(255, 255, 255, 0.8);
+  width: 264px;
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(12px);
-  border-right: 1px solid rgba(148, 163, 184, 0.2);
+  border-right: 1px solid rgba(148, 163, 184, 0.18);
   display: flex;
   flex-direction: column;
-  padding: 22px 18px 18px;
+  padding: 20px 16px 18px;
   box-sizing: border-box;
   position: fixed;
   height: 100vh;
   top: 0;
   left: 0;
   z-index: 100;
-  box-shadow: 8px 0 30px rgba(15, 23, 42, 0.04);
+  box-shadow: 8px 0 26px rgba(15, 23, 42, 0.04);
 }
 
 .sidebar-logo-container {
@@ -31,16 +31,16 @@
 }
 
 .sidebar-logo-icon {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
   color: #ffffff;
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.28);
+  font-size: 17px;
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.22);
 }
 
 .sidebar-brand-name {
@@ -60,26 +60,26 @@
 }
 
 .sidebar-profile-card {
-  background: linear-gradient(135deg, #0ea5e9 0%, #1d4ed8 50%, #0f172a 100%);
+  background: linear-gradient(135deg, #0ea5e9 0%, #1d4ed8 48%, #0f172a 100%);
   color: #ffffff;
-  padding: 14px 16px;
-  border-radius: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 22px;
-  box-shadow: 0 14px 28px rgba(29, 78, 216, 0.2);
+  margin-bottom: 20px;
+  box-shadow: 0 12px 24px rgba(29, 78, 216, 0.18);
 }
 
 .sidebar-avatar {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   background-color: rgba(255, 255, 255, 0.18);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   border: 1px solid rgba(255, 255, 255, 0.22);
 }
@@ -106,8 +106,8 @@
 .sidebar-nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 12px;
+  gap: 10px;
+  padding: 10px 12px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
@@ -129,9 +129,10 @@
 }
 
 .nav-icon {
-  font-size: 16px;
-  width: 20px;
+  font-size: 14px;
+  width: 18px;
   text-align: center;
+  line-height: 1;
 }
 
 .sidebar-footer {
@@ -164,11 +165,11 @@
 }
 
 .patient-topbar {
-  height: 74px;
-  padding: 0 36px;
-  background: rgba(255, 255, 255, 0.78);
+  height: 72px;
+  padding: 0 30px;
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -179,14 +180,14 @@
 }
 
 .patient-search {
-  width: 360px;
-  height: 42px;
+  width: 340px;
+  height: 40px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 14px;
+  gap: 9px;
+  padding: 0 12px;
   background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 12px;
   color: #64748b;
   box-sizing: border-box;

@@ -35,6 +35,7 @@ import DoctorAppointmentDetailPage from './pages/doctor/DoctorAppointmentDetailP
 import DoctorDashboardPage from './pages/doctor/DoctorDashboardPage';
 import DoctorProfilePage from './pages/doctor/DoctorProfilePage';
 import DoctorSchedule from './pages/doctor/DoctorSchedulePage';
+import DoctorPatientsPage from './pages/doctor/DoctorPatientsPage';
 
 import DoctorsPage from './pages/public/DoctorsPage';
 import HomePage from './pages/public/HomePage';
@@ -81,6 +82,7 @@ function ApplicationRoutes() {
         <Route path="/medico/citas" element={<DoctorAppointmentsPage />} />
         <Route path="/medico/citas/:id" element={<DoctorAppointmentDetailPage />} />
         <Route path="/medico/perfil" element={<DoctorProfilePage />} />
+        <Route path="/medico/pacientes" element={<DoctorPatientsPage />} />
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />

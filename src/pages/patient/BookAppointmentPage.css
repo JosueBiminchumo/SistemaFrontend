@@ -396,3 +396,8 @@
   font-size: 14px;
   color: #111827;
 }
+
+.appointment-confirmation {
+  width: 100%;
+  box-sizing: border-box;
+}

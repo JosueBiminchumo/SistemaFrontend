@@ -18,8 +18,22 @@ export default function AppointmentDetailPage() {
     localStorage.getItem('appointments') || '[]'
   );
 
+  const currentUser = JSON.parse(
+    localStorage.getItem('mediturn_user')
+  );
+
+  const patients = JSON.parse(
+    localStorage.getItem('patients') || '[]'
+  );
+
+  const currentPatient = patients.find(
+    (patient) => patient.id === currentUser.id
+  );
+
   const appointment = appointments.find(
-    (item) => String(item.id) === id
+    (item) =>
+      String(item.id) === id &&
+      item.patientId === currentUser.id
   );
 
   if (!appointment) {
@@ -152,7 +166,11 @@ export default function AppointmentDetailPage() {
 
           <div className="detail-item">
             <span>Paciente</span>
-            <strong>Juan Pérez</strong>
+            <strong>
+              {currentPatient
+                ? `${currentPatient.firstName} ${currentPatient.lastName}`
+                : 'Paciente'}
+            </strong>
           </div>
 
           <div className="detail-item">

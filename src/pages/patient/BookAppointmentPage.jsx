@@ -371,10 +371,15 @@ export default function BookAppointmentPage() {
       return;
     }
 
+  const currentUser = JSON.parse(
+    localStorage.getItem('mediturn_user')
+  );
+
   const newAppointment = {
     id: storedAppointments.length > 0
       ? Math.max(...storedAppointments.map((appointment) => appointment.id)) + 1
       : 1,
+    patientId: currentUser.id,
     doctor: doctor.name,
     specialty: doctor.specialty,
     date: selectedDate,
@@ -400,6 +405,7 @@ export default function BookAppointmentPage() {
   const newNotification = {
     id: `appointment-${newAppointment.id}`,
     appointmentId: newAppointment.id,
+    patientId: currentUser.id,
     message: `Tu cita con ${doctor.name} fue reservada para el ${selectedDate} a las ${selectedTime}.`,
     date: selectedDate,
     time: selectedTime,

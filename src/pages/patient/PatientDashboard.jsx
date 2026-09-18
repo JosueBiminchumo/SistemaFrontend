@@ -2,26 +2,43 @@ import { Link } from 'react-router-dom';
 import './PatientDashboard.css';
 
 function getAppointments() {
+  const storedUser = localStorage.getItem('mediturn_user');
   const storedAppointments = localStorage.getItem('appointments');
 
-  if (!storedAppointments) {
+  if (!storedUser || !storedAppointments) {
     return [];
   }
 
-  return JSON.parse(storedAppointments);
+  const currentUser = JSON.parse(storedUser);
+  const appointments = JSON.parse(storedAppointments);
+
+  return appointments.filter(
+    (appointment) => appointment.patientId === currentUser.id
+  );
 }
 
 function getProfile() {
-  const storedProfile = localStorage.getItem('patientProfile');
+  const storedUser = localStorage.getItem('mediturn_user');
+  const storedPatients = localStorage.getItem('patients');
 
-  if (!storedProfile) {
+  if (!storedUser || !storedPatients) {
     return {
-      firstName: 'María',
-      lastName: 'García',
+      firstName: 'Paciente',
+      lastName: '',
     };
   }
 
-  return JSON.parse(storedProfile);
+  const currentUser = JSON.parse(storedUser);
+  const patients = JSON.parse(storedPatients);
+
+  return (
+    patients.find(
+      (patient) => patient.id === currentUser.id
+    ) || {
+      firstName: 'Paciente',
+      lastName: '',
+    }
+  );
 }
 
 function formatDate(date) {

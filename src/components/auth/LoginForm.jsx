@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 
 const testUsers = [
   {
+    id: 1,
     role: 'paciente',
     name: 'Ana Paciente',
     email: 'paciente@mediturn.pe',
@@ -9,6 +10,7 @@ const testUsers = [
     dashboardPath: '/paciente/inicio',
   },
   {
+    id: 2,
     role: 'medico',
     name: 'Dr. Luis Medina',
     email: 'medico@mediturn.pe',
@@ -16,6 +18,7 @@ const testUsers = [
     dashboardPath: '/medico/dashboard',
   },
   {
+    id: 3,
     role: 'admin',
     name: 'Admin MediTurn',
     email: 'admin@mediturn.pe',
@@ -105,6 +108,7 @@ export default function LoginForm({ onLogin }) {
     }
 
     onLogin({
+      id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,

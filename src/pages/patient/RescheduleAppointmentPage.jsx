@@ -10,8 +10,14 @@ export default function RescheduleAppointmentPage() {
     localStorage.getItem('appointments') || '[]'
   );
 
+  const currentUser = JSON.parse(
+    localStorage.getItem('mediturn_user')
+  );
+
   const appointment = appointments.find(
-    (item) => String(item.id) === id
+    (item) =>
+      String(item.id) === id &&
+      item.patientId === currentUser.id
   );
 
   if (!appointment) {
@@ -100,6 +106,28 @@ export default function RescheduleAppointmentPage() {
         JSON.stringify(updatedAppointments)
       );
 
+      const storedNotifications = JSON.parse(
+        localStorage.getItem('notifications') || '[]'
+      );
+
+      const newNotification = {
+        id: `appointment-rescheduled-${appointment.id}-${Date.now()}`,
+        appointmentId: appointment.id,
+        patientId: currentUser.id,
+        message: `Tu cita con ${appointment.doctor} fue reprogramada para el ${newDate} a las ${newTime}.`,
+        date: newDate,
+        time: newTime,
+        read: false,
+      };
+
+      localStorage.setItem(
+        'notifications',
+        JSON.stringify([
+          newNotification,
+          ...storedNotifications,
+        ])
+      );
+
       Swal.fire({
         title: 'Cita reprogramada',
         text: 'Los cambios se guardaron correctamente.',
@@ -184,10 +212,23 @@ export default function RescheduleAppointmentPage() {
 
                 <select id="new-time" name="new-time" required>
                   <option value="">Selecciona un horario</option>
+                  <option value="08:00">08:00</option>
+                  <option value="08:30">08:30</option>
+                  <option value="09:00">09:00</option>
+                  <option value="09:30">09:30</option>
                   <option value="10:00">10:00</option>
+                  <option value="10:30">10:30</option>
                   <option value="11:00">11:00</option>
+                  <option value="11:30">11:30</option>
+                  <option value="12:00">12:00</option>
+                  <option value="12:30">12:30</option>
+                  <option value="13:00">13:00</option>
+                  <option value="13:30">13:30</option>
+                  <option value="14:00">14:00</option>
+                  <option value="14:30">14:30</option>
                   <option value="15:00">15:00</option>
-                  <option value="16:00">16:00</option>
+                  <option value="15:30">15:30</option>
+                  <option value="16:00">16:00</option>    
                 </select>
               </div>
             </div>

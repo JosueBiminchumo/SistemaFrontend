@@ -3,13 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import './PatientHistoryPage.css';
 
 function getAppointments() {
+  const storedUser = localStorage.getItem('mediturn_user');
   const storedAppointments = localStorage.getItem('appointments');
 
-  if (!storedAppointments) {
+  if (!storedUser || !storedAppointments) {
     return [];
   }
 
-  return JSON.parse(storedAppointments);
+  const currentUser = JSON.parse(storedUser);
+  const appointments = JSON.parse(storedAppointments);
+
+  return appointments.filter(
+    (appointment) => appointment.patientId === currentUser.id
+  );
 }
 
 function getStatusLabel(status) {

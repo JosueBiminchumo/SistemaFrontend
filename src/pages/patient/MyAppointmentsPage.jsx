@@ -5,13 +5,19 @@ import AppointmentCard from '../../components/appointments/AppointmentCard';
 import './MyAppointmentsPage.css';
 
 function getAppointments() {
+  const storedUser = localStorage.getItem('mediturn_user');
   const storedAppointments = localStorage.getItem('appointments');
 
-  if (!storedAppointments) {
+  if (!storedUser || !storedAppointments) {
     return [];
   }
 
-  return JSON.parse(storedAppointments);
+  const currentUser = JSON.parse(storedUser);
+  const appointments = JSON.parse(storedAppointments);
+
+  return appointments.filter(
+    (appointment) => appointment.patientId === currentUser.id
+  );
 }
 
 export default function MyAppointmentsPage() {
@@ -21,32 +27,43 @@ export default function MyAppointmentsPage() {
   const navigate = useNavigate();
 
   const handleCancel = (id) => {
-  Swal.fire({
-    title: '¿Estás seguro de que deseas cancelar esta cita?',
-    text: 'Esta acción no se puede deshacer.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Confirmar',
-    cancelButtonText: 'Cancelar',
-    reverseButtons: true,
-    confirmButtonColor: '#2563eb',
-    cancelButtonColor: '#e2e8f0',
-    customClass: {
-      cancelButton: 'swal-cancel-button',
-    },
-  }).then((result) => {
+    Swal.fire({
+      title: '¿Estás seguro de que deseas cancelar esta cita?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Confirmar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#e2e8f0',
+      customClass: {
+        cancelButton: 'swal-cancel-button',
+      },
+    }).then((result) => {
       if (!result.isConfirmed) {
         return;
       }
 
-      const updatedAppointments = appointments.map(
+      const storedAppointments = localStorage.getItem('appointments');
+      const allAppointments = JSON.parse(storedAppointments || '[]');
+
+      const updatedAppointments = allAppointments.map(
         (appointment) =>
           appointment.id === id
             ? { ...appointment, status: 'cancelled' }
             : appointment
       );
 
-      setAppointments(updatedAppointments);
+      const currentUser = JSON.parse(
+        localStorage.getItem('mediturn_user')
+      );
+
+      const currentUserAppointments = updatedAppointments.filter(
+        (appointment) => appointment.patientId === currentUser.id
+      );
+
+      setAppointments(currentUserAppointments);
 
       localStorage.setItem(
         'appointments',

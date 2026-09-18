@@ -3,29 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import './PatientProfilePage.css';
 
-const initialProfile = {
-  firstName: 'Juan',
-  lastName: 'Pérez',
-  document: '74567890',
-  birthDate: '2000-05-15',
-  phone: '987654321',
-  email: 'juan.perez@email.com',
-  address: 'Av. Los Álamos 123, Lima',
-};
-
 function getProfile() {
-  const storedProfile = localStorage.getItem('patientProfile');
+  const storedUser = localStorage.getItem('mediturn_user');
+  const storedPatients = localStorage.getItem('patients');
 
-  if (storedProfile) {
-    return JSON.parse(storedProfile);
+  if (!storedUser || !storedPatients) {
+    return null;
   }
 
-  localStorage.setItem(
-    'patientProfile',
-    JSON.stringify(initialProfile)
-  );
+  const currentUser = JSON.parse(storedUser);
+  const patients = JSON.parse(storedPatients);
 
-  return initialProfile;
+  return patients.find(
+    (patient) => patient.id === currentUser.id
+  );
 }
 
 export default function PatientProfilePage() {
@@ -33,6 +24,17 @@ export default function PatientProfilePage() {
   const [profile, setProfile] = useState(getProfile);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+
+  if (!profile) {
+    return (
+      <main className="patient-profile-page">
+        <section className="patient-profile-container">
+          <h1>Perfil no encontrado</h1>
+          <p>No se encontró la información del paciente actual.</p>
+        </section>
+      </main>
+    );
+  }
 
   const fullName = `${profile.firstName} ${profile.lastName}`;
 
@@ -50,9 +52,16 @@ export default function PatientProfilePage() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    const storedPatients = localStorage.getItem('patients');
+    const patients = JSON.parse(storedPatients || '[]');
+
+    const updatedPatients = patients.map((patient) =>
+      patient.id === profile.id ? profile : patient
+    );
+
     localStorage.setItem(
-      'patientProfile',
-      JSON.stringify(profile)
+      'patients',
+      JSON.stringify(updatedPatients)
     );
 
     Swal.fire({

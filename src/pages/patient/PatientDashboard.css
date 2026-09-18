@@ -1,103 +1,120 @@
-/* Contenedor principal del Dashboard */
 .patient-dashboard {
-  background-color: #f4f5f7;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
   min-height: 100vh;
-  padding: 24px;
+  padding: 28px 24px 40px;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  color: #1f2937;
+  color: #0f172a;
 }
 
 .patient-dashboard-container {
-  max-width: 1100px;
+  max-width: 1160px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-/* Cabecera / Saludo */
 .patient-dashboard-header h1 {
-  font-size: 26px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 4px 0;
+  font-size: clamp(28px, 3vw, 34px);
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.04em;
 }
 
 .patient-dashboard-header p {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: 15px;
+  color: #64748b;
   margin: 0;
 }
 
-/* 3 Tarjetas de Resumen Superior */
 .dashboard-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
 }
 
 .summary-card {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 22px 18px;
+  border-radius: 18px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
   display: flex;
   align-items: center;
   gap: 16px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.08);
 }
 
 .summary-card-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  background-color: #f0fdf4;
+  font-size: 22px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.summary-card:nth-child(1) .summary-card-icon {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(37, 99, 235, 0.08));
+}
+
+.summary-card:nth-child(2) .summary-card-icon {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.13), rgba(16, 185, 129, 0.08));
+}
+
+.summary-card:nth-child(3) .summary-card-icon {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(59, 130, 246, 0.08));
 }
 
 .summary-card span {
   display: block;
-  font-size: 11px;
-  font-weight: 700;
-  color: #6b7280;
-  letter-spacing: 0.5px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .summary-card strong {
   display: block;
-  font-size: 22px;
-  font-weight: 700;
-  color: #111827;
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
 }
 
 .summary-card small {
   display: block;
   font-size: 12px;
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
-/* Tarjeta Destacada de Próxima Cita (Estilo Azul Oscuro) */
 .next-appointment-card {
-  background: linear-gradient(135deg, #0077b6 0%, #03045e 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 45%, #0ea5e9 100%);
   color: #ffffff;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2);
+  padding: 24px 22px;
+  border-radius: 22px;
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.2);
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
 .next-appointment-card.empty-card {
-  background: #ffffff;
-  color: #111827;
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  color: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.04);
 }
 
 .next-appointment-header {
@@ -110,32 +127,33 @@
 
 .badge-proxima {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.8);
   text-transform: uppercase;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .empty-card .badge-proxima {
-  color: #6b7280;
+  color: #64748b;
 }
 
 .next-appointment-card h2 {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   margin: 0 0 4px 0;
+  letter-spacing: -0.04em;
 }
 
 .next-appointment-card p {
-  font-size: 14px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
 }
 
 .empty-card p {
-  color: #6b7280;
+  color: #475569;
 }
 
 .next-appointment-datetime {
@@ -143,60 +161,61 @@
   flex-direction: column;
   align-items: flex-end;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   gap: 4px;
 }
 
 .next-appointment-actions {
   display: flex;
   gap: 12px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .empty-card .next-appointment-actions {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e2e8f0;
 }
 
 .btn-detalle, .btn-reprogramar {
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
 .btn-detalle {
   background-color: #ffffff;
-  color: #03045e;
+  color: #0f172a;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
 }
 
 .btn-detalle:hover {
-  background-color: #f3f4f6;
+  background-color: #f8fafc;
 }
 
 .empty-card .btn-detalle {
-  background-color: #0077b6;
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
   color: #ffffff;
 }
 
 .btn-reprogramar {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.12);
   color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .btn-reprogramar:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.18);
 }
 
-/* Sección de Citas Recientes */
 .patient-dashboard-section {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 22px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.04);
 }
 
 .section-title-row {
@@ -207,17 +226,17 @@
 }
 
 .section-title-row h2 {
-  font-size: 16px;
-  font-weight: 700;
-  color: #111827;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
   margin: 0;
 }
 
 .ver-todas-link {
   font-size: 13px;
-  color: #0077b6;
+  color: #2563eb;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .ver-todas-link:hover {
@@ -234,10 +253,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background-color: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #f3f4f6;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.recent-appointment-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.05);
 }
 
 .appt-info-left {
@@ -247,66 +272,65 @@
 }
 
 .stethoscope-icon {
-  width: 36px;
-  height: 36px;
-  background-color: #e5e7eb;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .recent-appointment-item strong {
   display: block;
-  font-size: 14px;
-  color: #111827;
+  font-size: 15px;
+  color: #0f172a;
 }
 
 .recent-appointment-item p {
   font-size: 12px;
-  color: #6b7280;
-  margin: 2px 0 0 0;
+  color: #64748b;
+  margin: 3px 0 0 0;
 }
 
-/* Badges de Estado */
 .status-badge {
   font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 20px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
   display: inline-block;
+  letter-spacing: 0.02em;
 }
 
 .status-badge.confirmed {
-  background-color: #e0f2fe;
-  color: #0284c7;
+  background-color: #dbeafe;
+  color: #1d4ed8;
 }
 
 .status-badge.completed, .status-badge.atendida {
   background-color: #dcfce7;
-  color: #16a34a;
+  color: #15803d;
 }
 
 .status-badge.pending {
-  background-color: #fef9c3;
-  color: #ca8a04;
+  background-color: #fef3c7;
+  color: #b45309;
 }
 
 .no-appointments-text {
   font-size: 13px;
-  color: #6b7280;
+  color: #64748b;
   text-align: center;
-  padding: 12px 0;
+  padding: 14px 0 6px;
   margin: 0;
 }
 
-/* Banner de Recordatorio (Inferior) */
 .dashboard-reminder-banner {
-  background-color: #fefce8;
-  border: 1px solid #fef08a;
-  padding: 16px;
-  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.14), rgba(252, 211, 77, 0.06));
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  padding: 18px 20px;
+  border-radius: 16px;
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -318,126 +342,13 @@
 
 .dashboard-reminder-banner strong {
   display: block;
-  font-size: 14px;
-  color: #854d0e;
-  margin-bottom: 2px;
+  color: #0f172a;
+  margin-bottom: 4px;
 }
 
 .dashboard-reminder-banner p {
-  font-size: 13px;
-  color: #713f12;
   margin: 0;
-  line-height: 1.4;
-}
-
-.next-appt {
-  background: linear-gradient(120deg, #0b1120, #0e7490);
-  border-radius: 14px;
-  padding: 26px 28px;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.next-appt-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.next-appt-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #93c5fd;
-  margin: 0 0 8px 0;
-}
-
-.next-appt h3 {
-  font-size: 19px;
-  font-weight: 700;
-  margin: 0 0 4px 0;
-}
-
-.next-appt-specialty {
+  color: #475569;
   font-size: 14px;
-  color: #cbd5e1;
-  margin: 0 0 14px 0;
 }
 
-.next-appt-datetime {
-  display: flex;
-  gap: 18px;
-  font-size: 13px;
-  color: #e2e8f0;
-  margin-bottom: 18px;
-}
-
-.next-appt-datetime span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.next-appt-datetime svg {
-  width: 15px;
-  height: 15px;
-}
-
-.next-appt-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.next-appt-detail,
-.next-appt-reschedule {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 9px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.next-appt-detail {
-  background: #ffffff;
-  color: #0f172a;
-}
-
-.next-appt-detail:hover {
-  background: #f1f5f9;
-}
-
-.next-appt-reschedule {
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.next-appt-reschedule:hover {
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.next-appt-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.next-appt-icon svg {
-  width: 24px;
-  height: 24px;
-  stroke: #ffffff;
-}

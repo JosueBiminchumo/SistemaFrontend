@@ -1,4 +1,4 @@
-import { weekDays } from '../pages/doctor/doctorScheduleMock';
+import { weekDays } from '../pages/doctor/doctorStorage';
 
 export default function ScheduleCalendar({ slots, onDelete }) {
   const slotsByDay = weekDays.map((day) => ({

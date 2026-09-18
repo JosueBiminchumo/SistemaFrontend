@@ -3,49 +3,88 @@ import {
   Navigate,
   Route,
   Routes,
-  useLocation,
 } from 'react-router-dom';
 
-import Navbar from './components/Navbar';
 import AdminLayout from './components/admin/AdminLayout';
-
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import PatientDashboard from './pages/patient/PatientDashboard';
-import DoctorSchedule from './pages/doctor/DoctorSchedulePage';
+import PatientLayout from './components/patient/PatientLayout';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
-import SpecialtiesManagementPage from './pages/admin/SpecialtiesManagementPage';
 import AppointmentsManagementPage from './pages/admin/AppointmentsManagementPage';
-import StatisticsPage from './pages/admin/StatisticsPage';
 import AdminProfilePage from './pages/admin/AdminProfilePage';
+import SpecialtiesManagementPage from './pages/admin/SpecialtiesManagementPage';
+import StatisticsPage from './pages/admin/StatisticsPage';
 
-function ApplicationRoutes() {
-  const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
+import AppointmentDetailPage from './pages/patient/AppointmentDetailPage';
+import BookAppointmentPage from './pages/patient/BookAppointmentPage';
+import MyAppointmentsPage from './pages/patient/MyAppointmentsPage';
+import PatientDashboard from './pages/patient/PatientDashboard';
+import PatientHistoryPage from './pages/patient/PatientHistoryPage';
+import PatientProfilePage from './pages/patient/PatientProfilePage';
+import RescheduleAppointmentPage from './pages/patient/RescheduleAppointmentPage';
 
+import DoctorDashboardPage from './pages/doctor/DoctorDashboardPage';
+import DoctorSchedule from './pages/doctor/DoctorSchedulePage';
+
+import DoctorsPage from './pages/public/DoctorsPage';
+import HomePage from './pages/public/HomePage';
+import LoginPage from './pages/public/LoginPage';
+import NotFoundPage from './pages/public/NotFoundPage';
+import RegisterPage from './pages/public/RegisterPage';
+import UnauthorizedPage from './pages/public/UnauthorizedPage';
+
+export default function App() {
   return (
-    <>
-      {!isAdminRoute && <Navbar />}
-
+    <BrowserRouter>
       <Routes>
-        {/* Ruta inicial */}
+        {/* Rutas públicas */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/registro" element={<RegisterPage />} />
+        <Route path="/medicos" element={<DoctorsPage />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route
-          path="/"
+          path="/auth"
           element={<Navigate to="/login" replace />}
         />
 
-        {/* Rutas públicas */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/registro" element={<Register />} />
-
         {/* Rutas del paciente */}
-        <Route
-          path="/paciente/inicio"
-          element={<PatientDashboard />}
-        />
+        <Route path="/paciente" element={<PatientLayout />}>
+          <Route index element={<PatientDashboard />} />
+          <Route
+            path="inicio"
+            element={<PatientDashboard />}
+          />
+          <Route
+            path="reservar-cita"
+            element={<BookAppointmentPage />}
+          />
+          <Route
+            path="mis-citas"
+            element={<MyAppointmentsPage />}
+          />
+          <Route
+            path="historial"
+            element={<PatientHistoryPage />}
+          />
+          <Route
+            path="cita/:id"
+            element={<AppointmentDetailPage />}
+          />
+          <Route
+            path="cita/:id/reprogramar"
+            element={<RescheduleAppointmentPage />}
+          />
+          <Route
+            path="perfil"
+            element={<PatientProfilePage />}
+          />
+        </Route>
 
         {/* Rutas del médico */}
+        <Route
+          path="/medico/dashboard"
+          element={<DoctorDashboardPage />}
+        />
         <Route
           path="/medico/agenda"
           element={<DoctorSchedule />}
@@ -57,27 +96,22 @@ function ApplicationRoutes() {
             index
             element={<Navigate to="dashboard" replace />}
           />
-
           <Route
             path="dashboard"
             element={<AdminDashboard />}
           />
-
           <Route
             path="especialidades"
             element={<SpecialtiesManagementPage />}
           />
-
           <Route
             path="citas"
             element={<AppointmentsManagementPage />}
           />
-
           <Route
             path="estadisticas"
             element={<StatisticsPage />}
           />
-
           <Route
             path="perfil"
             element={<AdminProfilePage />}
@@ -85,19 +119,8 @@ function ApplicationRoutes() {
         </Route>
 
         {/* Página no encontrada */}
-        <Route
-          path="*"
-          element={<h2>404 - Página no encontrada</h2>}
-        />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </>
-  );
-}
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <ApplicationRoutes />
     </BrowserRouter>
   );
 }

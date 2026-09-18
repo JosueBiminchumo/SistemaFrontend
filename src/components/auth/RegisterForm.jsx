@@ -4,6 +4,7 @@ const initialValues = {
   firstName: '',
   lastName: '',
   documentNumber: '',
+  birthDate: '',
   phone: '',
   email: '',
   password: '',
@@ -22,10 +23,12 @@ export default function RegisterForm({ onRegister }) {
 
   const handleChange = (event) => {
     const { name, type, checked, value } = event.target;
+
     setValues((current) => ({
       ...current,
       [name]: type === 'checkbox' ? checked : value,
     }));
+
     setErrors((current) => ({ ...current, [name]: '' }));
     setSuccess('');
   };
@@ -45,6 +48,10 @@ export default function RegisterForm({ onRegister }) {
       nextErrors.documentNumber = 'El DNI debe tener 8 digitos.';
     }
 
+    if (!values.birthDate) {
+      nextErrors.birthDate = 'Ingresa tu fecha de nacimiento.';
+    }
+
     if (!/^\d{9}$/.test(values.phone.trim())) {
       nextErrors.phone = 'El celular debe tener 9 digitos.';
     }
@@ -56,7 +63,8 @@ export default function RegisterForm({ onRegister }) {
     }
 
     if (values.password.length < 8) {
-      nextErrors.password = 'La contrasena debe tener al menos 8 caracteres.';
+      nextErrors.password =
+        'La contrasena debe tener al menos 8 caracteres.';
     }
 
     if (values.confirmPassword !== values.password) {
@@ -64,7 +72,8 @@ export default function RegisterForm({ onRegister }) {
     }
 
     if (!values.acceptedTerms) {
-      nextErrors.acceptedTerms = 'Debes aceptar el uso de datos para continuar.';
+      nextErrors.acceptedTerms =
+        'Debes aceptar el uso de datos para continuar.';
     }
 
     return nextErrors;
@@ -72,6 +81,7 @@ export default function RegisterForm({ onRegister }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
     const nextErrors = validate();
 
     if (Object.keys(nextErrors).length > 0) {
@@ -83,6 +93,7 @@ export default function RegisterForm({ onRegister }) {
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
       documentNumber: values.documentNumber.trim(),
+      birthDate: values.birthDate,
       phone: values.phone.trim(),
       email: values.email.trim().toLowerCase(),
       password: values.password,
@@ -90,13 +101,20 @@ export default function RegisterForm({ onRegister }) {
     };
 
     onRegister(patient);
+
     setValues(initialValues);
-    setSuccess('Registro realizado correctamente. Ya puedes iniciar sesion.');
+    setSuccess(
+      'Registro realizado correctamente. Ya puedes iniciar sesion.'
+    );
   };
 
   return (
     <form className="auth-form" onSubmit={handleSubmit} noValidate>
-      {success && <p className="form-alert form-alert--success">{success}</p>}
+      {success && (
+        <p className="form-alert form-alert--success">
+          {success}
+        </p>
+      )}
 
       <div className="form-grid">
         <label className="field" htmlFor="first-name">
@@ -141,25 +159,39 @@ export default function RegisterForm({ onRegister }) {
             type="text"
             value={values.documentNumber}
           />
-          {errors.documentNumber && <small>{errors.documentNumber}</small>}
+          {errors.documentNumber && (
+            <small>{errors.documentNumber}</small>
+          )}
         </label>
 
-        <label className="field" htmlFor="phone">
-          <span>Celular</span>
+        <label className="field" htmlFor="birth-date">
+          <span>Fecha de nacimiento</span>
           <input
-            autoComplete="tel"
-            id="phone"
-            inputMode="numeric"
-            maxLength="9"
-            name="phone"
+            id="birth-date"
+            name="birthDate"
+            type="date"
             onChange={handleChange}
-            placeholder="987654321"
-            type="tel"
-            value={values.phone}
+            value={values.birthDate}
           />
-          {errors.phone && <small>{errors.phone}</small>}
+          {errors.birthDate && <small>{errors.birthDate}</small>}
         </label>
       </div>
+
+      <label className="field" htmlFor="phone">
+        <span>Celular</span>
+        <input
+          autoComplete="tel"
+          id="phone"
+          inputMode="numeric"
+          maxLength="9"
+          name="phone"
+          onChange={handleChange}
+          placeholder="987654321"
+          type="tel"
+          value={values.phone}
+        />
+        {errors.phone && <small>{errors.phone}</small>}
+      </label>
 
       <label className="field" htmlFor="register-email">
         <span>Correo electronico</span>
@@ -201,11 +233,16 @@ export default function RegisterForm({ onRegister }) {
             type="password"
             value={values.confirmPassword}
           />
-          {errors.confirmPassword && <small>{errors.confirmPassword}</small>}
+          {errors.confirmPassword && (
+            <small>{errors.confirmPassword}</small>
+          )}
         </label>
       </div>
 
-      <label className="check-field check-field--stacked" htmlFor="accepted-terms">
+      <label
+        className="check-field check-field--stacked"
+        htmlFor="accepted-terms"
+      >
         <input
           checked={values.acceptedTerms}
           id="accepted-terms"
@@ -213,11 +250,21 @@ export default function RegisterForm({ onRegister }) {
           onChange={handleChange}
           type="checkbox"
         />
-        <span>Acepto el uso de mis datos para gestionar citas medicas.</span>
+        <span>
+          Acepto el uso de mis datos para gestionar citas medicas.
+        </span>
       </label>
-      {errors.acceptedTerms && <small className="field-error">{errors.acceptedTerms}</small>}
 
-      <button className="button button--primary button--full" type="submit">
+      {errors.acceptedTerms && (
+        <small className="field-error">
+          {errors.acceptedTerms}
+        </small>
+      )}
+
+      <button
+        className="button button--primary button--full"
+        type="submit"
+      >
         Crear cuenta
       </button>
     </form>

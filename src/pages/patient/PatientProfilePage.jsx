@@ -37,7 +37,6 @@ export default function PatientProfilePage() {
   }
 
   const fullName = `${profile.firstName} ${profile.lastName}`;
-
   const initials = `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`;
 
   const handleChange = (event) => {
@@ -55,14 +54,71 @@ export default function PatientProfilePage() {
     const storedPatients = localStorage.getItem('patients');
     const patients = JSON.parse(storedPatients || '[]');
 
+    if (currentPassword || newPassword) {
+      if (!currentPassword || !newPassword) {
+        Swal.fire({
+          title: 'Completa los campos',
+          text: 'Ingresa tu contraseña actual y la nueva contraseña.',
+          icon: 'warning',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2563eb',
+        });
+        return;
+      }
+
+      if (currentPassword !== profile.password) {
+        Swal.fire({
+          title: 'Contraseña incorrecta',
+          text: 'La contraseña actual no coincide.',
+          icon: 'error',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2563eb',
+        });
+        return;
+      }
+
+      if (newPassword.length < 8) {
+        Swal.fire({
+          title: 'Contraseña inválida',
+          text: 'La nueva contraseña debe tener al menos 8 caracteres.',
+          icon: 'warning',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2563eb',
+        });
+        return;
+      }
+    }
+
+    const profileToSave = {
+      ...profile,
+      ...(newPassword ? { password: newPassword } : {}),
+    };
+
     const updatedPatients = patients.map((patient) =>
-      patient.id === profile.id ? profile : patient
+      patient.id === profileToSave.id ? profileToSave : patient
     );
 
     localStorage.setItem(
       'patients',
       JSON.stringify(updatedPatients)
     );
+
+    const registeredPatient = JSON.parse(
+      localStorage.getItem('mediturn_registered_patient') || 'null'
+    );
+
+    if (registeredPatient && registeredPatient.id === profileToSave.id) {
+      localStorage.setItem(
+        'mediturn_registered_patient',
+        JSON.stringify(profileToSave)
+      );
+    }
+
+    setProfile(profileToSave);
+
+    setProfile(profileToSave);
+    setCurrentPassword('');
+    setNewPassword('');
 
     Swal.fire({
       title: 'Perfil actualizado',
@@ -146,7 +202,7 @@ export default function PatientProfilePage() {
                   id="document"
                   name="document"
                   type="text"
-                  value={profile.document}
+                  value={profile.document || profile.documentNumber || ''}
                   onChange={handleChange}
                   required
                 />
@@ -163,7 +219,7 @@ export default function PatientProfilePage() {
                   id="birth-date"
                   name="birthDate"
                   type="date"
-                  value={profile.birthDate}
+                  value={profile.birthDate || ''}
                   onChange={handleChange}
                   required
                 />
@@ -178,7 +234,7 @@ export default function PatientProfilePage() {
                   id="phone"
                   name="phone"
                   type="tel"
-                  value={profile.phone}
+                  value={profile.phone || ''}
                   onChange={handleChange}
                   required
                 />
@@ -195,7 +251,7 @@ export default function PatientProfilePage() {
                   id="email"
                   name="email"
                   type="email"
-                  value={profile.email}
+                  value={profile.email || ''}
                   onChange={handleChange}
                   required
                 />

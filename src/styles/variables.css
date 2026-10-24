@@ -1,0 +1,46 @@
+:root {
+  /* Colores principales */
+  --color-primary: #087f8c;
+  --color-primary-hover: #066a75;
+  --color-primary-dark: #075e68;
+  --color-primary-light: #e2f7f8;
+
+  /* Fondo */
+  --color-bg-gradient-start: #e8f5f7;
+  --color-bg-gradient-end: #f5fbfc;
+  --color-white: #ffffff;
+
+  /* Texto */
+  --color-text-dark: #173b3f;
+  --color-text-body: #333333;
+  --color-text-muted: #666666;
+  --color-text-light: #777777;
+
+  /* Bordes */
+  --color-border: #d5dfe0;
+
+  /* Estados (para citas: pendiente, confirmada, completada, cancelada) */
+  --color-success: #2e7d32;
+  --color-warning: #f9a825;
+  --color-danger: #d32f2f;
+  --color-info: #0288d1;
+
+  /* Tipografía */
+  --font-family-base: Arial, Helvetica, sans-serif;
+
+  /* Bordes redondeados */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 20px;
+
+  /* Sombras */
+  --shadow-card: 0 15px 45px rgba(0, 0, 0, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(8, 127, 140, 0.1);
+
+  /* Espaciado */
+  --spacing-xs: 8px;
+  --spacing-sm: 15px;
+  --spacing-md: 20px;
+  --spacing-lg: 30px;
+  --spacing-xl: 50px;
+}

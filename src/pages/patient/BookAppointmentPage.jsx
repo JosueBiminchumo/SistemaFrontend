@@ -1,246 +1,152 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { createAppointment } from '../../services/appointmentService';
+import { getDoctorSchedule, listDoctors } from '../../services/doctorService';
+import { listSpecialties } from '../../services/specialtyService';
 import './BookAppointmentPage.css';
 
-const specialties = [
-  {
-    id: 'cardiologia',
-    name: 'Cardiología',
-    count: '2 médicos',
-    icon: '❤️',
-  },
-  {
-    id: 'dermatologia',
-    name: 'Dermatología',
-    count: '2 médicos',
-    icon: '✨',
-  },
-  {
-    id: 'neurologia',
-    name: 'Neurología',
-    count: '1 médico',
-    icon: '🧠',
-  },
-  {
-    id: 'pediatria',
-    name: 'Pediatría',
-    count: '2 médicos',
-    icon: '👶',
-  },
-  {
-    id: 'traumatologia',
-    name: 'Traumatología',
-    count: '1 médico',
-    icon: '🦴',
-  },
-  {
-    id: 'medicina-general',
-    name: 'Medicina General',
-    count: '3 médicos',
-    icon: '🩺',
-  },
-  {
-    id: 'ginecologia',
-    name: 'Ginecología',
-    count: '2 médicos',
-    icon: '🛡️',
-  },
-  {
-    id: 'oftalmologia',
-    name: 'Oftalmología',
-    count: '1 médico',
-    icon: '👁️',
-  },
-];
-
-const doctorsBySpecialty = {
-  cardiologia: [
-    {
-      id: 'carlos-mendoza',
-      name: 'Dr. Carlos Mendoza Ríos',
-      specialty: 'Cardiología',
-      experience: '12 años de experiencia',
-      rating: '4.9',
-      initials: 'CM',
-    },
-    {
-      id: 'maria-lopez',
-      name: 'Dra. María López',
-      specialty: 'Cardiología',
-      experience: '9 años de experiencia',
-      rating: '4.8',
-      initials: 'ML',
-    },
-  ],
-
-  dermatologia: [
-    {
-      id: 'ana-torres',
-      name: 'Dra. Ana Torres Valdez',
-      specialty: 'Dermatología',
-      experience: '8 años de experiencia',
-      rating: '4.7',
-      initials: 'AT',
-    },
-    {
-      id: 'luis-mendoza',
-      name: 'Dr. Luis Mendoza',
-      specialty: 'Dermatología',
-      experience: '11 años de experiencia',
-      rating: '4.8',
-      initials: 'LM',
-    },
-  ],
-
-  neurologia: [
-    {
-      id: 'carlos-ramirez',
-      name: 'Dr. Carlos Ramírez',
-      specialty: 'Neurología',
-      experience: '10 años de experiencia',
-      rating: '4.9',
-      initials: 'CR',
-    },
-  ],
-
-  pediatria: [
-    {
-      id: 'juan-torres',
-      name: 'Dr. Juan Torres',
-      specialty: 'Pediatría',
-      experience: '9 años de experiencia',
-      rating: '4.8',
-      initials: 'JT',
-    },
-    {
-      id: 'laura-castillo',
-      name: 'Dra. Laura Castillo',
-      specialty: 'Pediatría',
-      experience: '7 años de experiencia',
-      rating: '4.7',
-      initials: 'LC',
-    },
-  ],
-
-  traumatologia: [
-    {
-      id: 'miguel-herrera',
-      name: 'Dr. Miguel Herrera',
-      specialty: 'Traumatología',
-      experience: '13 años de experiencia',
-      rating: '4.9',
-      initials: 'MH',
-    },
-  ],
-
-  'medicina-general': [
-    {
-      id: 'carlos-garcia',
-      name: 'Dr. Carlos García',
-      specialty: 'Medicina General',
-      experience: '10 años de experiencia',
-      rating: '4.8',
-      initials: 'CG',
-    },
-    {
-      id: 'patricia-gomez',
-      name: 'Dra. Patricia Gómez',
-      specialty: 'Medicina General',
-      experience: '8 años de experiencia',
-      rating: '4.7',
-      initials: 'PG',
-    },
-    {
-      id: 'andres-flores',
-      name: 'Dr. Andrés Flores',
-      specialty: 'Medicina General',
-      experience: '6 años de experiencia',
-      rating: '4.6',
-      initials: 'AF',
-    },
-  ],
-
-  ginecologia: [
-    {
-      id: 'elena-vargas',
-      name: 'Dra. Elena Vargas',
-      specialty: 'Ginecología',
-      experience: '11 años de experiencia',
-      rating: '4.9',
-      initials: 'EV',
-    },
-    {
-      id: 'jorge-ruiz',
-      name: 'Dr. Jorge Ruiz',
-      specialty: 'Ginecología',
-      experience: '8 años de experiencia',
-      rating: '4.7',
-      initials: 'JR',
-    },
-  ],
-
-  oftalmologia: [
-    {
-      id: 'sofia-navarro',
-      name: 'Dra. Sofía Navarro',
-      specialty: 'Oftalmología',
-      experience: '9 años de experiencia',
-      rating: '4.8',
-      initials: 'SN',
-    },
-  ],
+const specialtyIcons = {
+  Cardiología: '❤️',
+  Dermatología: '✨',
+  Neurología: '🧠',
+  Pediatría: '👶',
+  Traumatología: '🦴',
+  'Medicina General': '🩺',
+  Ginecología: '🛡️',
+  Oftalmología: '👁️',
 };
 
-const availableTimes = [
-  '08:00',
-  '08:30',
-  '09:00',
-  '09:30',
-  '10:00',
-  '10:30',
-  '11:00',
-  '11:30',
-  '12:00',
-  '12:30',
-  '13:00',
-  '13:30',
-  '14:00',
-  '14:30',
-  '15:00',
-  '15:30',
-  '16:00',
-];
+function getLocalDate() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 10);
+}
 
 export default function BookAppointmentPage() {
   const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [specialties, setSpecialties] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [availableTimes, setAvailableTimes] = useState([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [reason, setReason] = useState('');
+  const [error, setError] = useState('');
+  const [isLoadingSpecialties, setIsLoadingSpecialties] = useState(true);
+  const [isLoadingDoctors, setIsLoadingDoctors] = useState(false);
+  const [isLoadingTimes, setIsLoadingTimes] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [availabilityRefresh, setAvailabilityRefresh] = useState(0);
 
-  const specialty = specialties.find(
-    (item) => item.id === selectedSpecialty
-  );
+  const specialty = specialties.find((item) => item.id === selectedSpecialty);
+  const doctor = doctors.find((item) => item.id === selectedDoctor);
+  const doctorName = doctor ? `${doctor.firstName} ${doctor.lastName}` : '';
 
-  const doctors = selectedSpecialty
-    ? doctorsBySpecialty[selectedSpecialty] || []
-    : [];
+  useEffect(() => {
+    let active = true;
 
-  const doctor = doctors.find(
-    (item) => item.id === selectedDoctor
-  );
+    listSpecialties()
+      .then((items) => {
+        if (active) {
+          setSpecialties(items.filter((item) => item.active));
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsLoadingSpecialties(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedSpecialty) {
+      return undefined;
+    }
+
+    let active = true;
+    listDoctors({ specialtyId: selectedSpecialty })
+      .then((items) => {
+        if (active) {
+          setDoctors(items);
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsLoadingDoctors(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedSpecialty]);
+
+  useEffect(() => {
+    if (!selectedDoctor || !selectedDate) {
+      return undefined;
+    }
+
+    let active = true;
+    getDoctorSchedule(selectedDoctor, selectedDate)
+      .then((schedules) => {
+        if (active) {
+          const slots = schedules.flatMap((schedule) =>
+            schedule.availableSlots.map((slot) => slot.slice(0, 5))
+          );
+          setAvailableTimes([...new Set(slots)].sort());
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setError(requestError.message);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsLoadingTimes(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedDate, selectedDoctor, availabilityRefresh]);
 
   const handleSpecialtySelect = (specialtyId) => {
+    setError('');
     setSelectedSpecialty(specialtyId);
     setSelectedDoctor(null);
+    setSelectedDate('');
+    setSelectedTime('');
+    setDoctors([]);
+    setAvailableTimes([]);
+    setIsLoadingDoctors(true);
   };
 
   const handleDoctorSelect = (doctorId) => {
+    setError('');
     setSelectedDoctor(doctorId);
+    setSelectedDate('');
+    setSelectedTime('');
+    setAvailableTimes([]);
   };
 
   const handleNext = () => {
@@ -291,22 +197,10 @@ export default function BookAppointmentPage() {
         return;
       }
 
-      const storedAppointments = JSON.parse(
-        localStorage.getItem('appointments') || '[]'
-      );
-
-      const appointmentExists = storedAppointments.some(
-        (appointment) =>
-          appointment.doctor === doctor.name &&
-          appointment.date === selectedDate &&
-          appointment.time === selectedTime &&
-          appointment.status !== 'cancelled'
-      );
-
-      if (appointmentExists) {
+      if (!availableTimes.includes(selectedTime)) {
         Swal.fire({
           title: 'Horario no disponible',
-          text: 'El médico ya tiene una cita registrada en ese horario. Selecciona otro horario.',
+          text: 'Ese horario ya no está disponible. Selecciona otro horario.',
           icon: 'warning',
           confirmButtonText: 'Aceptar',
           confirmButtonColor: '#2563eb',
@@ -345,116 +239,48 @@ export default function BookAppointmentPage() {
     setCurrentStep((step) => step - 1);
   };
 
-  const handleSubmit = () => {
-    const storedAppointments = JSON.parse(
-      localStorage.getItem('appointments') || '[]'
-    );
-
-    const appointmentExists = storedAppointments.some(
-      (appointment) =>
-        appointment.doctor === doctor.name &&
-        appointment.date === selectedDate &&
-        appointment.time === selectedTime &&
-        appointment.status !== 'cancelled'
-    );
-
-    if (appointmentExists) {
-      Swal.fire({
-        title: 'Horario no disponible',
-        text: 'El médico ya tiene una cita registrada en ese horario. Selecciona otro horario.',
-        icon: 'warning',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#2563eb',
-      });
-
+  const handleSubmit = async () => {
+    if (!doctor || !availableTimes.includes(selectedTime)) {
+      setError('El horario seleccionado ya no está disponible. Elige otro.');
       setCurrentStep(3);
+      setSelectedTime('');
+      setAvailabilityRefresh((current) => current + 1);
       return;
     }
 
-  const currentUser = JSON.parse(
-    localStorage.getItem('mediturn_user')
-  );
+    setIsSubmitting(true);
+    setError('');
+    try {
+      await createAppointment({
+        doctorId: doctor.id,
+        startAt: `${selectedDate}T${selectedTime}:00`,
+        reason: reason.trim(),
+      });
 
-  const newAppointment = {
-    id: storedAppointments.length > 0
-      ? Math.max(...storedAppointments.map((appointment) => appointment.id)) + 1
-      : 1,
-    patientId: currentUser.id,
-    doctor: doctor.name,
-    specialty: doctor.specialty,
-    date: selectedDate,
-    time: selectedTime,
-    reason: reason.trim(),
-    status: 'pending',
-  };
-
-    const updatedAppointments = [
-      ...storedAppointments,
-      newAppointment,
-    ];
-
-  localStorage.setItem(
-    'appointments',
-    JSON.stringify(updatedAppointments)
-  );
-
-  const storedNotifications = JSON.parse(
-    localStorage.getItem('notifications') || '[]'
-  );
-
-  const newNotification = {
-    id: `appointment-${newAppointment.id}`,
-    appointmentId: newAppointment.id,
-    patientId: currentUser.id,
-    message: `Tu cita con ${doctor.name} fue reservada para el ${selectedDate} a las ${selectedTime}.`,
-    date: selectedDate,
-    time: selectedTime,
-    read: false,
-  };
-
-  localStorage.setItem(
-    'notifications',
-    JSON.stringify([
-      newNotification,
-      ...storedNotifications,
-    ])
-  );
-
-    Swal.fire({
-      title: 'Cita reservada con éxito',
-      html: `
-        <div class="reservation-success">
-          <p>Tu cita ha sido registrada correctamente.</p>
-
-          <div class="reservation-details">
-            <div>
-              <span>Especialidad</span>
-              <strong>${specialty?.name}</strong>
-            </div>
-
-            <div>
-              <span>Médico</span>
-              <strong>${doctor?.name}</strong>
-            </div>
-
-            <div>
-              <span>Fecha</span>
-              <strong>${selectedDate}</strong>
-            </div>
-
-            <div>
-              <span>Hora</span>
-              <strong>${selectedTime}</strong>
-            </div>
-          </div>
-        </div>
-      `,
-      icon: 'success',
-      confirmButtonText: 'Ver mis citas',
-      confirmButtonColor: '#2563eb',
-    }).then(() => {
+      await Swal.fire({
+        title: 'Cita reservada con éxito',
+        text: `Tu cita con ${doctorName} quedó registrada para el ${selectedDate} a las ${selectedTime}.`,
+        icon: 'success',
+        confirmButtonText: 'Ver mis citas',
+        confirmButtonColor: '#2563eb',
+      });
       navigate('/paciente/mis-citas');
-    });
+    } catch (requestError) {
+      const message =
+        requestError?.message || 'No se pudo reservar la cita. Intenta nuevamente.';
+      setError(message);
+      setSelectedTime('');
+      setAvailabilityRefresh((current) => current + 1);
+      await Swal.fire({
+        title: 'No se pudo reservar la cita',
+        text: message,
+        icon: 'error',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2563eb',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -464,6 +290,8 @@ export default function BookAppointmentPage() {
           <h1>Reservar cita</h1>
           <p>Sigue los pasos para agendar tu cita médica</p>
         </div>
+
+        {error && <p role="alert">{error}</p>}
 
         <div className="steps-indicator">
           <div
@@ -582,7 +410,11 @@ export default function BookAppointmentPage() {
               <h2>Selecciona una especialidad</h2>
 
               <div className="specialties-grid">
-                {specialties.map((item) => (
+                {isLoadingSpecialties ? (
+                  <p>Cargando especialidades...</p>
+                ) : specialties.length === 0 ? (
+                  <p>No hay especialidades activas disponibles.</p>
+                ) : specialties.map((item) => (
                   <div
                     key={item.id}
                     className={`specialty-card ${
@@ -595,12 +427,12 @@ export default function BookAppointmentPage() {
                     }
                   >
                     <div className="specialty-icon-box">
-                      {item.icon}
+                      {specialtyIcons[item.name] || '🩺'}
                     </div>
 
                     <div className="specialty-info">
                       <strong>{item.name}</strong>
-                      <span>{item.count}</span>
+                      <span>{item.description || 'Especialidad médica'}</span>
                     </div>
                   </div>
                 ))}
@@ -616,7 +448,11 @@ export default function BookAppointmentPage() {
               </h2>
 
               <div className="doctors-list">
-                {doctors.map((item) => (
+                {isLoadingDoctors ? (
+                  <p>Cargando médicos...</p>
+                ) : doctors.length === 0 ? (
+                  <p>No hay médicos activos para esta especialidad.</p>
+                ) : doctors.map((item) => (
                   <div
                     key={item.id}
                     className={`doctor-card ${
@@ -630,17 +466,17 @@ export default function BookAppointmentPage() {
                   >
                     <div className="doctor-info-left">
                       <div className="doctor-avatar">
-                        {item.initials}
+                        {`${item.firstName?.[0] || ''}${item.lastName?.[0] || ''}`.toUpperCase()}
                       </div>
 
                       <div>
-                        <strong>{item.name}</strong>
-                        <span>{item.experience}</span>
+                        <strong>{item.firstName} {item.lastName}</strong>
+                        <span>{item.biography || `CMP ${item.licenseNumber}`}</span>
                       </div>
                     </div>
 
                     <div className="doctor-rating">
-                      ⭐ {item.rating}
+                      CMP {item.licenseNumber}
                     </div>
                   </div>
                 ))}
@@ -665,10 +501,11 @@ export default function BookAppointmentPage() {
                     onChange={(event) => {
                       setSelectedDate(event.target.value);
                       setSelectedTime('');
+                      setAvailableTimes([]);
+                      setError('');
+                      setIsLoadingTimes(Boolean(event.target.value));
                     }}
-                    min={new Date()
-                      .toISOString()
-                      .split('T')[0]}
+                    min={getLocalDate()}
                   />
                 </div>
 
@@ -676,7 +513,11 @@ export default function BookAppointmentPage() {
                   <label>Horarios disponibles</label>
 
                   <div className="available-times">
-                    {availableTimes.map((time) => (
+                    {isLoadingTimes ? (
+                      <p>Cargando horarios...</p>
+                    ) : availableTimes.length === 0 ? (
+                      <p>No hay horarios disponibles para esta fecha.</p>
+                    ) : availableTimes.map((time) => (
                       <button
                         key={time}
                         type="button"
@@ -738,7 +579,7 @@ export default function BookAppointmentPage() {
 
                   <div className="confirmation-item">
                     <span>Médico</span>
-                    <strong>{doctor?.name}</strong>
+                    <strong>{doctorName}</strong>
                   </div>
 
                   <div className="confirmation-item">
@@ -805,8 +646,9 @@ export default function BookAppointmentPage() {
               type="button"
               className="btn-siguiente active"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             >
-              Confirmar cita
+              {isSubmitting ? 'Guardando...' : 'Confirmar cita'}
             </button>
           )}
         </div>

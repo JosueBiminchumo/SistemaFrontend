@@ -6,5 +6,7 @@ import com.mediturno.backend.patient.domain.Patient;
 
 public interface PatientRepository extends JpaRepository<Patient, Long> {
 
+    java.util.Optional<Patient> findByUserEmail(String email);
+
     boolean existsByDocumentNumberAndUserIdNot(String documentNumber, Long userId);
 }

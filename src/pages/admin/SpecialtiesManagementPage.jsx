@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Baby,
   Bone,
@@ -14,73 +14,12 @@ import {
 } from 'lucide-react';
 
 import './SpecialtiesManagementPage.css';
-
-const initialSpecialties = [
-  {
-    id: 1,
-    name: 'Cardiología',
-    description: 'Corazón y sistema circulatorio',
-    doctors: 2,
-    active: true,
-    icon: 'heart',
-  },
-  {
-    id: 2,
-    name: 'Dermatología',
-    description: 'Piel, cabello y uñas',
-    doctors: 2,
-    active: true,
-    icon: 'sparkles',
-  },
-  {
-    id: 3,
-    name: 'Neurología',
-    description: 'Sistema nervioso',
-    doctors: 1,
-    active: true,
-    icon: 'brain',
-  },
-  {
-    id: 4,
-    name: 'Pediatría',
-    description: 'Salud infantil',
-    doctors: 2,
-    active: true,
-    icon: 'baby',
-  },
-  {
-    id: 5,
-    name: 'Traumatología',
-    description: 'Huesos y articulaciones',
-    doctors: 1,
-    active: true,
-    icon: 'bone',
-  },
-  {
-    id: 6,
-    name: 'Medicina General',
-    description: 'Atención primaria de salud',
-    doctors: 3,
-    active: true,
-    icon: 'stethoscope',
-  },
-  {
-    id: 7,
-    name: 'Ginecología',
-    description: 'Salud de la mujer',
-    doctors: 2,
-    active: true,
-    icon: 'shield',
-  },
-  {
-    id: 8,
-    name: 'Oftalmología',
-    description: 'Salud visual',
-    doctors: 1,
-    active: true,
-    icon: 'eye',
-  },
-];
+import {
+  createSpecialty,
+  deactivateSpecialty,
+  listSpecialties,
+  updateSpecialty,
+} from '../../services/specialtyService';
 
 const specialtyIcons = {
   heart: HeartPulse,
@@ -99,12 +38,23 @@ const emptyForm = {
 };
 
 export default function SpecialtiesManagementPage() {
-  const [specialties, setSpecialties] = useState(initialSpecialties);
+  const [specialties, setSpecialties] = useState([]);
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    listSpecialties()
+      .then((items) => setSpecialties(items.map((item) => ({
+        ...item,
+        description: item.description ?? '',
+        icon: 'stethoscope',
+      }))))
+      .catch((requestError) => setLoadError(requestError.message));
+  }, []);
 
   const filteredSpecialties = useMemo(() => {
     const searchValue = search.trim().toLowerCase();
@@ -153,7 +103,7 @@ export default function SpecialtiesManagementPage() {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const name = form.name.trim();
@@ -175,46 +125,32 @@ export default function SpecialtiesManagementPage() {
       return;
     }
 
-    if (selectedSpecialty) {
-      setSpecialties((currentSpecialties) =>
-        currentSpecialties.map((specialty) =>
-          specialty.id === selectedSpecialty.id
-            ? {
-                ...specialty,
-                name,
-                description,
-              }
-            : specialty,
-        ),
-      );
-    } else {
-      setSpecialties((currentSpecialties) => [
-        ...currentSpecialties,
-        {
-          id: Date.now(),
-          name,
-          description,
-          doctors: 0,
-          active: true,
-          icon: 'stethoscope',
-        },
-      ]);
+    try {
+      const specialty = selectedSpecialty
+        ? await updateSpecialty(selectedSpecialty.id, { name, description })
+        : await createSpecialty({ name, description });
+      const savedSpecialty = {
+        ...specialty,
+        description: specialty.description ?? '',
+        icon: selectedSpecialty?.icon ?? 'stethoscope',
+      };
+      setSpecialties((currentSpecialties) => selectedSpecialty
+        ? currentSpecialties.map((item) => item.id === savedSpecialty.id ? savedSpecialty : item)
+        : [...currentSpecialties, savedSpecialty]);
+      closeModal();
+    } catch (requestError) {
+      setError(requestError.message);
     }
-
-    closeModal();
   };
 
-  const toggleStatus = (specialtyId) => {
-    setSpecialties((currentSpecialties) =>
-      currentSpecialties.map((specialty) =>
-        specialty.id === specialtyId
-          ? {
-              ...specialty,
-              active: !specialty.active,
-            }
-          : specialty,
-      ),
-    );
+  const toggleStatus = async (specialtyId) => {
+    try {
+      await deactivateSpecialty(specialtyId);
+      setSpecialties((currentSpecialties) =>
+        currentSpecialties.filter((specialty) => specialty.id !== specialtyId));
+    } catch (requestError) {
+      setLoadError(requestError.message);
+    }
   };
 
   return (
@@ -234,6 +170,8 @@ export default function SpecialtiesManagementPage() {
           Nueva especialidad
         </button>
       </header>
+
+      {loadError && <p role="alert" className="specialties-page__empty">{loadError}</p>}
 
       <label className="specialties-page__search">
         <Stethoscope size={18} />
@@ -280,11 +218,6 @@ export default function SpecialtiesManagementPage() {
 
                 <h2>{specialty.name}</h2>
                 <p>{specialty.description}</p>
-
-                <strong>
-                  {specialty.doctors}{' '}
-                  {specialty.doctors === 1 ? 'médico' : 'médicos'}
-                </strong>
 
                 <div className="specialty-card__divider" />
 

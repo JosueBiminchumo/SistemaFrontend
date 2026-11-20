@@ -9,6 +9,7 @@ import {
 import Navbar from './components/Navbar';
 import AdminLayout from './components/admin/AdminLayout';
 import PatientLayout from './components/patient/PatientLayout';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -62,7 +63,14 @@ function ApplicationRoutes() {
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />
 
-        <Route path="/paciente" element={<PatientLayout />}>
+        <Route
+          path="/paciente"
+          element={
+            <ProtectedRoute allowedRoles={['PACIENTE', 'PATIENT']}>
+              <PatientLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<PatientDashboard />} />
           <Route path="inicio" element={<PatientDashboard />} />
           <Route path="buscar" element={<SearchDoctorsPage />} />
@@ -75,16 +83,72 @@ function ApplicationRoutes() {
           <Route path="perfil" element={<PatientProfilePage />} />
         </Route>
 
-        <Route path="/paciente/inicio" element={<PatientDashboardPage />} />
+        <Route
+          path="/paciente/inicio"
+          element={
+            <ProtectedRoute allowedRoles={['PACIENTE', 'PATIENT']}>
+              <PatientDashboardPage />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/medico/dashboard" element={<DoctorDashboardPage />} />
-        <Route path="/medico/agenda" element={<DoctorSchedule />} />
-        <Route path="/medico/citas" element={<DoctorAppointmentsPage />} />
-        <Route path="/medico/citas/:id" element={<DoctorAppointmentDetailPage />} />
-        <Route path="/medico/perfil" element={<DoctorProfilePage />} />
-        <Route path="/medico/pacientes" element={<DoctorPatientsPage />} />
+        <Route
+          path="/medico/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['MEDICO', 'DOCTOR']}>
+              <DoctorDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/medico/agenda"
+          element={
+            <ProtectedRoute allowedRoles={['MEDICO', 'DOCTOR']}>
+              <DoctorSchedule />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/medico/citas"
+          element={
+            <ProtectedRoute allowedRoles={['MEDICO', 'DOCTOR']}>
+              <DoctorAppointmentsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/medico/citas/:id"
+          element={
+            <ProtectedRoute allowedRoles={['MEDICO', 'DOCTOR']}>
+              <DoctorAppointmentDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/medico/perfil"
+          element={
+            <ProtectedRoute allowedRoles={['MEDICO', 'DOCTOR']}>
+              <DoctorProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/medico/pacientes"
+          element={
+            <ProtectedRoute allowedRoles={['MEDICO', 'DOCTOR']}>
+              <DoctorPatientsPage />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="especialidades" element={<SpecialtiesManagementPage />} />

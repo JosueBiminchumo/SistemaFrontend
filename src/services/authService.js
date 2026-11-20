@@ -1,6 +1,16 @@
 import api from './api';
 
+function normalizeRole(role) {
+  return typeof role === 'string' ? role.trim().toUpperCase() : '';
+}
+
 function parseJwt(token) {
+  if (!token || typeof token !== 'string') return null;
+
+  if (token.startsWith('local-token-')) {
+    return { role: token.replace('local-token-', '').trim(), exp: Date.now() + 86400000 };
+  }
+
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -11,6 +21,15 @@ function parseJwt(token) {
         .join('')
     );
     return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
+function getStoredUser() {
+  try {
+    const user = localStorage.getItem('mediturn_user');
+    return user ? JSON.parse(user) : null;
   } catch {
     return null;
   }
@@ -42,28 +61,43 @@ export const register = async (userData) => {
 
 export const logout = () => {
   localStorage.removeItem('token');
+  localStorage.removeItem('mediturn_user');
 };
 
 export const getToken = () => localStorage.getItem('token');
 
 export const isAuthenticated = () => {
+  const storedUser = getStoredUser();
   const token = getToken();
+
+  if (storedUser && (storedUser.role || storedUser.rol)) {
+    return true;
+  }
+
   if (!token) return false;
 
   const payload = parseJwt(token);
-  if (!payload?.exp) return true; 
+  if (!payload) return false;
+  if (!payload.exp) return true;
 
   return payload.exp * 1000 > Date.now();
 };
+
 export const getUserRole = () => {
+  const storedUser = getStoredUser();
+  if (storedUser?.role || storedUser?.rol) {
+    return normalizeRole(storedUser.role || storedUser.rol);
+  }
+
   const token = getToken();
   if (!token) return null;
   const payload = parseJwt(token);
-  return payload?.role || payload?.rol || payload?.authorities?.[0] || null;
+  const role = payload?.role || payload?.rol || payload?.authorities?.[0] || null;
+  return role ? normalizeRole(role) : null;
 };
 
 export const roleToHomeRoute = (role) => {
-  switch (role) {
+  switch (normalizeRole(role)) {
     case 'MEDICO':
     case 'DOCTOR':
       return '/medico/dashboard';

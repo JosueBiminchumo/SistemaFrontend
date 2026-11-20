@@ -40,6 +40,11 @@ mvn test
 - `POST /api/v1/auth/login`: valida credenciales y devuelve un JWT.
 - `GET /api/v1/patients/me`: devuelve el perfil del paciente autenticado.
 - `PUT /api/v1/patients/me`: actualiza DNI, fecha de nacimiento y teléfono.
+- `GET /api/v1/specialties`: devuelve el catálogo activo; `POST`, `PUT /{id}` y `DELETE /{id}` son exclusivos de ADMIN. El borrado es lógico.
+- `GET /api/v1/doctors`, `GET /api/v1/doctors/{id}` y `GET /api/v1/doctors/{id}/schedule?date=YYYY-MM-DD`: catálogo, detalle y horarios disponibles.
+- `PUT /api/v1/doctors/me/schedule`: reemplaza los horarios recurrentes del médico autenticado.
+- `POST /api/v1/appointments`, `GET /api/v1/appointments`, `GET /{id}`, `PUT /{id}` y `PATCH /{id}/cancel`: reserva y gestión de citas con alcance según rol.
+- `GET /api/v1/statistics/dashboard?from=YYYY-MM-DD&to=YYYY-MM-DD` y `GET /api/v1/statistics/appointments?groupBy=day|status|specialty&from=...&to=...`: indicadores exclusivos de ADMIN.
 - Las rutas `/api/v1/admin/**`, `/api/v1/doctors/**` y `/api/v1/patients/**`
   requieren respectivamente `ADMIN`, `DOCTOR` o `PATIENT` (también se permite
   `ADMIN` en las rutas de los otros roles).
@@ -68,4 +73,45 @@ El registro responde `201 Created` y crea siempre el rol `PATIENT`; un campo
 `401 Unauthorized` corresponde a credenciales inválidas y `409 Conflict` a un
 correo ya registrado.
 
-La política de CORS y la documentación Swagger se coordinan con el integrante 7.
+Las fechas de cita se envían como fecha/hora ISO local (`YYYY-MM-DDTHH:mm:ss`) en la zona `America/Lima`; la tabla MySQL usa `DATETIME` y no guarda desplazamiento horario. Los horarios ocupados se rechazan con `409 Conflict`; el paciente asociado se obtiene del JWT, nunca del cuerpo de la solicitud.
+
+La documentación OpenAPI está disponible en `/swagger-ui/index.html`. CORS se configura mediante `CORS_ALLOWED_ORIGINS`, separado por comas; el valor local predeterminado permite `http://localhost:*`.
+
+## Esquema MySQL existente
+
+No se modificaron las migraciones ni la configuración de conexión MySQL. Para iniciar con los módulos clínicos, la base ya configurada debe contener las tablas `specialties`, `doctors`, `doctor_schedules` y `citas` con las columnas y relaciones del esquema que ya usa el equipo; Hibernate mantiene `ddl-auto: validate` y detendrá el arranque si el esquema no coincide. Las pruebas crean un esquema temporal H2 y no escriben en MySQL.
+
+## Crear una base local nueva
+
+Solo para desarrollo local y una base vacía, ejecuta
+[`scripts/setup-local-mysql.sql`](./scripts/setup-local-mysql.sql) en MySQL Workbench
+con una cuenta administradora. Reemplaza el marcador de contraseña antes de
+ejecutarlo. El script no elimina ni modifica tablas existentes; usa
+`CREATE TABLE IF NOT EXISTS`.
+
+Como el script crea las tablas de las migraciones V1 y V2, configura Flyway para
+tomar la versión 2 como línea base al iniciar esta base nueva:
+
+```powershell
+$env:DB_URL = "jdbc:mysql://localhost:3306/mediturno?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+$env:DB_USERNAME = "mediturno_app"
+$securePassword = Read-Host "Contraseña de MySQL" -AsSecureString
+$passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+try {
+    $env:DB_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer)
+} finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer)
+}
+$env:SPRING_FLYWAY_BASELINE_ON_MIGRATE = "true"
+$env:SPRING_FLYWAY_BASELINE_VERSION = "2"
+$random = [Security.Cryptography.RandomNumberGenerator]::Create()
+$jwtBytes = New-Object byte[] 32
+$random.GetBytes($jwtBytes)
+$random.Dispose()
+$env:JWT_SECRET = [Convert]::ToBase64String($jwtBytes)
+mvn spring-boot:run
+```
+
+Ejecuta estos comandos desde `backend/`. No uses esta línea base en una base
+compartida o existente; conserva para ella la configuración y las migraciones
+que ya tenga.

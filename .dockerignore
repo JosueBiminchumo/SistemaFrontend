@@ -1,0 +1,7 @@
+.git
+.azure
+node_modules
+dist
+dist-ssr
+backend
+*.log

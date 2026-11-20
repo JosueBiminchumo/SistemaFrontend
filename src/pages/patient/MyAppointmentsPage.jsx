@@ -1,30 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import AppointmentCard from '../../components/appointments/AppointmentCard';
 import './MyAppointmentsPage.css';
-
-function getAppointments() {
-  const storedUser = localStorage.getItem('mediturn_user');
-  const storedAppointments = localStorage.getItem('appointments');
-
-  if (!storedUser || !storedAppointments) {
-    return [];
-  }
-
-  const currentUser = JSON.parse(storedUser);
-  const appointments = JSON.parse(storedAppointments);
-
-  return appointments.filter(
-    (appointment) => appointment.patientId === currentUser.id
-  );
-}
+import { cancelAppointment, listAppointments } from '../../services/appointmentService';
 
 export default function MyAppointmentsPage() {
-  const [appointments, setAppointments] = useState(getAppointments);
+  const [appointments, setAppointments] = useState([]);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    listAppointments()
+      .then((items) => setAppointments(items.map((appointment) => ({
+        ...appointment,
+        doctor: appointment.doctorName,
+        date: appointment.startAt.slice(0, 10),
+        time: appointment.startAt.slice(11, 16),
+        status: appointment.status.toLowerCase(),
+      }))))
+      .catch((requestError) => setError(requestError.message));
+  }, []);
 
   const handleCancel = (id) => {
     Swal.fire({
@@ -40,43 +38,25 @@ export default function MyAppointmentsPage() {
       customClass: {
         cancelButton: 'swal-cancel-button',
       },
-    }).then((result) => {
+    }).then(async (result) => {
       if (!result.isConfirmed) {
         return;
       }
 
-      const storedAppointments = localStorage.getItem('appointments');
-      const allAppointments = JSON.parse(storedAppointments || '[]');
-
-      const updatedAppointments = allAppointments.map(
-        (appointment) =>
-          appointment.id === id
-            ? { ...appointment, status: 'cancelled' }
-            : appointment
-      );
-
-      const currentUser = JSON.parse(
-        localStorage.getItem('mediturn_user')
-      );
-
-      const currentUserAppointments = updatedAppointments.filter(
-        (appointment) => appointment.patientId === currentUser.id
-      );
-
-      setAppointments(currentUserAppointments);
-
-      localStorage.setItem(
-        'appointments',
-        JSON.stringify(updatedAppointments)
-      );
-
-      Swal.fire({
-        title: 'Cita cancelada',
-        text: 'Tu cita ha sido cancelada correctamente.',
-        icon: 'success',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#2563eb',
-      });
+      try {
+        await cancelAppointment(id);
+        setAppointments((currentAppointments) => currentAppointments.map((appointment) =>
+          appointment.id === id ? { ...appointment, status: 'cancelled' } : appointment));
+        Swal.fire({
+          title: 'Cita cancelada',
+          text: 'Tu cita ha sido cancelada correctamente.',
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2563eb',
+        });
+      } catch (requestError) {
+        setError(requestError.message);
+      }
     });
   };
 
@@ -110,6 +90,8 @@ export default function MyAppointmentsPage() {
             <h1>Mis citas</h1>
             <p>Gestiona tus citas médicas</p>
           </div>
+
+          {error && <p role="alert">{error}</p>}
 
           <Link
             to="/paciente/reservar-cita"

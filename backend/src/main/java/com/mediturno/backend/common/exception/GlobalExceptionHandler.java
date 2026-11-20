@@ -7,6 +7,9 @@ import java.util.Map;
 import com.mediturno.backend.auth.exception.EmailAlreadyRegisteredException;
 import com.mediturno.backend.auth.exception.RegistrationDisabledException;
 import com.mediturno.backend.common.dto.ApiError;
+import com.mediturno.backend.common.exception.InvalidRequestException;
+import com.mediturno.backend.common.exception.ResourceConflictException;
+import com.mediturno.backend.common.exception.ResourceNotFoundException;
 import com.mediturno.backend.patient.exception.DocumentNumberAlreadyRegisteredException;
 import com.mediturno.backend.patient.exception.PatientProfileNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,13 +17,45 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ApiError> handleInvalidRequest(
+            InvalidRequestException exception,
+            HttpServletRequest request) {
+        return error(HttpStatus.BAD_REQUEST, exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiError> handleNotFound(
+            ResourceNotFoundException exception,
+            HttpServletRequest request) {
+        return error(HttpStatus.NOT_FOUND, exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(ResourceConflictException.class)
+    public ResponseEntity<ApiError> handleConflict(
+            ResourceConflictException exception,
+            HttpServletRequest request) {
+        return error(HttpStatus.CONFLICT, exception.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDenied(
+            AccessDeniedException exception,
+            HttpServletRequest request) {
+        return error(HttpStatus.FORBIDDEN, "No tienes permisos para esta acción.", request, Map.of());
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(
@@ -37,6 +72,31 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException exception,
             HttpServletRequest request) {
         return error(HttpStatus.BAD_REQUEST, "El cuerpo de la solicitud no es válido.", request, Map.of());
+    }
+
+    @ExceptionHandler({
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class
+    })
+    public ResponseEntity<ApiError> handleBadParameter(
+            Exception exception,
+            HttpServletRequest request) {
+        return error(
+                HttpStatus.BAD_REQUEST,
+                "Un parámetro de la solicitud es inválido o falta.",
+                request,
+                Map.of());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiError> handleMethodNotAllowed(
+            HttpRequestMethodNotSupportedException exception,
+            HttpServletRequest request) {
+        return error(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                "El método HTTP no está permitido para esta ruta.",
+                request,
+                Map.of());
     }
 
     @ExceptionHandler(EmailAlreadyRegisteredException.class)
@@ -66,7 +126,7 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return error(
                 HttpStatus.CONFLICT,
-                "No se pudo guardar la cuenta por un conflicto de datos.",
+                "No se pudo guardar la información por un conflicto de datos.",
                 request,
                 Map.of());
     }

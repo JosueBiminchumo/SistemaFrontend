@@ -1,13 +1,32 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { appointmentStatuses, getAppointments } from './doctorStorage';
+import { appointmentStatuses } from './doctorStorage';
 import DoctorLayout from './DoctorLayout';
 import './DoctorAppointmentsPage.css';
+import { listAppointments } from '../../services/appointmentService';
 
 export default function DoctorAppointmentsPage() {
-  const [appointments] = useState(() => getAppointments());
+  const [appointments, setAppointments] = useState([]);
   const [statusFilter, setStatusFilter] = useState('TODAS');
   const [dateFilter, setDateFilter] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    listAppointments()
+      .then((items) => setAppointments(items.map((appointment) => ({
+        ...appointment,
+        patientName: appointment.patientName,
+        date: appointment.startAt.slice(0, 10),
+        time: appointment.startAt.slice(11, 16),
+        status: {
+          PENDING: 'PENDIENTE',
+          CONFIRMED: 'CONFIRMADA',
+          COMPLETED: 'COMPLETADA',
+          CANCELLED: 'CANCELADA',
+        }[appointment.status] ?? appointment.status,
+      }))))
+      .catch((requestError) => setError(requestError.message));
+  }, []);
 
   const filteredAppointments = useMemo(() => {
     return appointments.filter((appt) => {
@@ -26,6 +45,8 @@ export default function DoctorAppointmentsPage() {
             <p className="doctor-appointments__subtitle">Consulta y filtra tus citas asignadas</p>
           </div>
         </header>
+
+        {error && <p role="alert">{error}</p>}
 
         <div className="doctor-appointments__filters">
           <div className="filter-field">

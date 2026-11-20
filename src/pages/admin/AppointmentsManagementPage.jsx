@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   CalendarDays,
   Clock3,
@@ -10,89 +10,9 @@ import {
 
 import AppointmentTable from '../../components/appointments/AppointmentTable';
 import './AppointmentsManagementPage.css';
+import { cancelAppointment, listAppointments } from '../../services/appointmentService';
 
-const initialAppointments = [
-  {
-    id: 1,
-    patient: 'María García',
-    doctor: 'Dr. Carlos Mendoza',
-    specialty: 'Cardiología',
-    date: '2026-09-18',
-    time: '09:00',
-    status: 'CONFIRMADA',
-    reason: 'Control cardiológico',
-  },
-  {
-    id: 2,
-    patient: 'María García',
-    doctor: 'Dra. Ana Torres',
-    specialty: 'Dermatología',
-    date: '2026-09-16',
-    time: '10:30',
-    status: 'COMPLETADA',
-    reason: 'Evaluación dermatológica',
-  },
-  {
-    id: 3,
-    patient: 'Juan Carlos',
-    doctor: 'Dr. Roberto Silva',
-    specialty: 'Medicina General',
-    date: '2026-09-19',
-    time: '14:00',
-    status: 'PENDIENTE',
-    reason: 'Dolor de cabeza recurrente',
-  },
-  {
-    id: 4,
-    patient: 'Ana Sofía',
-    doctor: 'Dra. Patricia Flores',
-    specialty: 'Ginecología',
-    date: '2026-09-20',
-    time: '11:00',
-    status: 'CONFIRMADA',
-    reason: 'Consulta preventiva',
-  },
-  {
-    id: 5,
-    patient: 'Pedro Arturo',
-    doctor: 'Dr. Carlos Mendoza',
-    specialty: 'Cardiología',
-    date: '2026-09-15',
-    time: '08:30',
-    status: 'COMPLETADA',
-    reason: 'Revisión de resultados',
-  },
-  {
-    id: 6,
-    patient: 'Juan Carlos',
-    doctor: 'Dr. Miguel Ángel',
-    specialty: 'Neurología',
-    date: '2026-09-14',
-    time: '16:00',
-    status: 'CANCELADA',
-    reason: 'Evaluación neurológica',
-  },
-  {
-    id: 7,
-    patient: 'María García',
-    doctor: 'Dr. Roberto Silva',
-    specialty: 'Medicina General',
-    date: '2026-09-22',
-    time: '15:30',
-    status: 'PENDIENTE',
-    reason: 'Consulta general',
-  },
-  {
-    id: 8,
-    patient: 'Ana Sofía',
-    doctor: 'Dra. Lucía Ramírez',
-    specialty: 'Pediatría',
-    date: '2026-09-17',
-    time: '09:30',
-    status: 'COMPLETADA',
-    reason: 'Control pediátrico',
-  },
-];
+const initialAppointments = [];
 
 const statusLabels = {
   PENDIENTE: 'Pendiente',
@@ -107,6 +27,25 @@ export default function AppointmentsManagementPage() {
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [appointmentToCancel, setAppointmentToCancel] = useState(null);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    listAppointments()
+      .then((items) => setAppointments(items.map((item) => ({
+        ...item,
+        patient: item.patientName,
+        doctor: item.doctorName,
+        date: item.startAt.slice(0, 10),
+        time: item.startAt.slice(11, 16),
+        status: {
+          PENDING: 'PENDIENTE',
+          CONFIRMED: 'CONFIRMADA',
+          COMPLETED: 'COMPLETADA',
+          CANCELLED: 'CANCELADA',
+        }[item.status] ?? item.status,
+      }))))
+      .catch((requestError) => setLoadError(requestError.message));
+  }, []);
 
   const filteredAppointments = useMemo(() => {
     const searchValue = search.trim().toLowerCase();
@@ -126,23 +65,24 @@ export default function AppointmentsManagementPage() {
     });
   }, [appointments, search, statusFilter]);
 
-  const confirmCancellation = () => {
+  const confirmCancellation = async () => {
     if (!appointmentToCancel) {
       return;
     }
 
-    setAppointments((currentAppointments) =>
-      currentAppointments.map((appointment) =>
-        appointment.id === appointmentToCancel.id
-          ? {
-              ...appointment,
-              status: 'CANCELADA',
-            }
-          : appointment,
-      ),
-    );
-
-    setAppointmentToCancel(null);
+    try {
+      await cancelAppointment(appointmentToCancel.id);
+      setAppointments((currentAppointments) =>
+        currentAppointments.map((appointment) =>
+          appointment.id === appointmentToCancel.id
+            ? { ...appointment, status: 'CANCELADA' }
+            : appointment,
+        ),
+      );
+      setAppointmentToCancel(null);
+    } catch (requestError) {
+      setLoadError(requestError.message);
+    }
   };
 
   return (
@@ -151,6 +91,8 @@ export default function AppointmentsManagementPage() {
         <h1>Gestión de citas</h1>
         <p>Todas las citas del sistema</p>
       </header>
+
+      {loadError && <p role="alert">{loadError}</p>}
 
       <section className="appointments-filters">
         <label className="appointments-search">

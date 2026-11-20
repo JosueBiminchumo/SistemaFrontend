@@ -43,9 +43,12 @@ import UnauthorizedPage from './pages/public/UnauthorizedPage';
 
 function ApplicationRoutes() {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
-  const hideNavbarRoutes = ['/login', '/registro', '/auth'];
-  const shouldShowNavbar = !isAdminRoute && !hideNavbarRoutes.includes(location.pathname);
+  const hideNavbarRoutes = ['/', '/login', '/registro', '/auth'];
+  const hasOwnNavigation = ['/admin', '/paciente', '/medico'].some((path) =>
+    location.pathname.startsWith(path),
+  );
+  const shouldShowNavbar =
+    !hideNavbarRoutes.includes(location.pathname) && !hasOwnNavigation;
 
   return (
     <>

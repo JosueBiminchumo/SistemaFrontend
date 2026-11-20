@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { listAppointments } from '../../services/appointmentService';
 import './PatientHistoryPage.css';
 
@@ -158,11 +158,23 @@ export default function PatientHistoryPage() {
           <div className="history-empty">
             <div className="history-empty-icon">📋</div>
 
-            <h3>No hay registros en el historial</h3>
-
+            <h3>
+              {historyAppointments.length === 0
+                ? 'Aún no tienes citas en el historial'
+                : 'No hay resultados para esta búsqueda'}
+            </h3>
             <p>
-              No se encontraron citas completadas o canceladas.
+              {historyAppointments.length === 0
+                ? 'Cuando completes o canceles una cita, aparecerá aquí.'
+                : 'Prueba con otro médico, especialidad o motivo.'}
             </p>
+            {historyAppointments.length === 0 ? (
+              <Link to="/paciente/reservar-cita">Reservar una cita</Link>
+            ) : (
+              <button type="button" onClick={() => setSearchTerm('')}>
+                Limpiar búsqueda
+              </button>
+            )}
           </div>
         ) : null}
       </section>

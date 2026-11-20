@@ -23,11 +23,12 @@ export default function AppointmentTable({
   appointments,
   onView,
   onCancel,
+  emptyMessage = 'No se encontraron citas con los filtros seleccionados.',
 }) {
   if (appointments.length === 0) {
     return (
       <div className="appointments-empty">
-        No se encontraron citas con los filtros seleccionados.
+        {emptyMessage}
       </div>
     );
   }

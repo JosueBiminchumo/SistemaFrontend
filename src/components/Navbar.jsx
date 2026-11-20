@@ -6,6 +6,7 @@ import {
   logout,
   roleToHomeRoute,
 } from '../services/authService';
+import './Navbar.css';
 
 export default function Navbar() {
   const location = useLocation();
@@ -31,47 +32,46 @@ export default function Navbar() {
 
   return (
     <>
-    {error && <p role="alert">{error}</p>}
-    <nav className="navbar">
-      <Link className="navbar__brand" to="/">
-        <span className="navbar__mark">M</span>
-        <strong>MediTurn</strong>
-      </Link>
-
-      <div className="navbar__links" aria-label="Navegacion principal">
-        <NavLink className="navbar__link" to="/">
-          Inicio
-        </NavLink>
-        <NavLink className="navbar__link" to="/medicos">
-          Medicos
-        </NavLink>
-        {dashboardPath && (
-          <NavLink className="navbar__link" to={dashboardPath}>
-            Mi panel
+      {error && <p role="alert">{error}</p>}
+      <nav className="navbar" aria-label="Navegación principal">
+        <Link className="navbar__brand" to="/">
+          <span className="navbar__mark" aria-hidden="true">M</span>
+          <strong>MediTurn</strong>
+        </Link>
+        <div className="navbar__links">
+          <NavLink className="navbar__link" to="/">
+            Inicio
           </NavLink>
-        )}
-      </div>
-
-      <div className="navbar__actions">
-        {user ? (
-          <>
-            <span className="navbar__user">{user.role}</span>
-            <button className="navbar__button" onClick={handleLogout} type="button">
-              Salir
-            </button>
-          </>
-        ) : (
-          <>
-            <NavLink className="navbar__link" to="/login" state={{ from: location.pathname }}>
-              Iniciar sesion
+          <NavLink className="navbar__link" to="/medicos">
+            Médicos
+          </NavLink>
+          {dashboardPath && (
+            <NavLink className="navbar__link" to={dashboardPath}>
+              Mi panel
             </NavLink>
-            <Link className="navbar__button" to="/registro">
-              Registrarse
-            </Link>
-          </>
-        )}
-      </div>
-    </nav>
+          )}
+        </div>
+
+        <div className="navbar__actions">
+          {user ? (
+            <>
+              <span className="navbar__user">{user.role}</span>
+              <button className="navbar__button" onClick={handleLogout} type="button">
+                Salir
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink className="navbar__link" to="/login" state={{ from: location.pathname }}>
+                Iniciar sesión
+              </NavLink>
+              <Link className="navbar__button" to="/registro">
+                Registrarse
+              </Link>
+            </>
+          )}
+        </div>
+      </nav>
     </>
   );
 }

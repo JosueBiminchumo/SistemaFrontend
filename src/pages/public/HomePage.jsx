@@ -42,17 +42,17 @@ const options = [
 ];
 
 export default function HomePage() {
-  const [doctorCount, setDoctorCount] = useState(null);
+  const [doctors, setDoctors] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
     listDoctors()
-      .then((doctors) => setDoctorCount(doctors.length))
+      .then(setDoctors)
       .catch((requestError) => setError(requestError.message));
   }, []);
 
   return (
-    <main className="public-page">
+    <main className="public-page public-page--home">
       <section className="vento-hero">
         <div className="hero-section__content">
           <span className="eyebrow">MediTurn</span>
@@ -73,9 +73,57 @@ export default function HomePage() {
 
         <div className="hero-summary" aria-label="Resumen de medicos">
           <span>Medicos disponibles</span>
-          <strong>{doctorCount ?? '—'}</strong>
-          {error && <small role="alert">{error}</small>}
+          <strong>{doctors ? doctors.length : '—'}</strong>
         </div>
+      </section>
+
+      <section className="public-section home-doctors">
+        <div className="section-heading">
+          <span className="eyebrow">Directorio</span>
+          <h2>Médicos registrados</h2>
+          <p>Información actualizada desde el sistema.</p>
+        </div>
+
+        {error && <p role="alert">{error}</p>}
+        {!doctors && !error && <p role="status">Cargando médicos...</p>}
+        {doctors && doctors.length === 0 && (
+          <div className="empty-state">
+            <h2>Aún no hay médicos registrados</h2>
+            <p>El directorio mostrará aquí a los profesionales activos.</p>
+          </div>
+        )}
+        {doctors && doctors.length > 0 && (
+          <>
+            <div className="doctor-grid home-doctors__grid">
+              {doctors.slice(0, 3).map((doctor) => (
+                <article className="doctor-card" key={doctor.id}>
+                  <div className="doctor-card__top">
+                    <div className="avatar" aria-hidden="true">
+                      {`${doctor.firstName[0]}${doctor.lastName[0]}`.toUpperCase()}
+                    </div>
+                    <div>
+                      <h2>{doctor.firstName} {doctor.lastName}</h2>
+                      <span>{doctor.specialty}</span>
+                    </div>
+                  </div>
+                  <dl className="doctor-details">
+                    <div>
+                      <dt>Registro profesional</dt>
+                      <dd>{doctor.licenseNumber}</dd>
+                    </div>
+                    <div>
+                      <dt>Perfil</dt>
+                      <dd>{doctor.biography || 'Sin biografía publicada'}</dd>
+                    </div>
+                  </dl>
+                </article>
+              ))}
+            </div>
+            <Link className="button button--outline" to="/medicos">
+              Ver directorio completo
+            </Link>
+          </>
+        )}
       </section>
 
       <section className="public-section public-section--compact">

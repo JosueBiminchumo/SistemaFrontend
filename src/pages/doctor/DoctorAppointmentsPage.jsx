@@ -11,6 +11,7 @@ export default function DoctorAppointmentsPage() {
   const [statusFilter, setStatusFilter] = useState('TODAS');
   const [dateFilter, setDateFilter] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     listAppointments()
@@ -26,7 +27,8 @@ export default function DoctorAppointmentsPage() {
           CANCELLED: 'CANCELADA',
         }[appointment.status] ?? appointment.status,
       }))))
-      .catch((requestError) => setError(requestError.message));
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredAppointments = useMemo(() => {
@@ -48,6 +50,7 @@ export default function DoctorAppointmentsPage() {
         </header>
 
         {error && <p role="alert">{error}</p>}
+        {loading && <p role="status">Cargando citas desde la base de datos...</p>}
 
         <div className="doctor-appointments__filters">
           <div className="filter-field">
@@ -72,9 +75,13 @@ export default function DoctorAppointmentsPage() {
           )}
         </div>
 
-        {filteredAppointments.length === 0 ? (
-          <p className="doctor-appointments__empty">No hay citas que coincidan con los filtros.</p>
-        ) : (
+        {!loading && !error && filteredAppointments.length === 0 ? (
+          <p className="doctor-appointments__empty">
+            {appointments.length === 0
+              ? 'Todavía no tienes citas registradas.'
+              : 'No hay citas que coincidan con los filtros.'}
+          </p>
+        ) : !loading && !error ? (
           <ul className="appointment-cards">
             {filteredAppointments.map((appt) => (
               <li key={appt.id} className="appointment-card">
@@ -95,7 +102,7 @@ export default function DoctorAppointmentsPage() {
               </li>
             ))}
           </ul>
-        )}
+        ) : null}
       </div>
     </DoctorLayout>
   );

@@ -10,6 +10,7 @@ export default function MyAppointmentsPage() {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +22,8 @@ export default function MyAppointmentsPage() {
         time: appointment.startAt.slice(11, 16),
         status: appointment.status.toLowerCase(),
       }))))
-      .catch((requestError) => setError(requestError.message));
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleCancel = (id) => {
@@ -166,7 +168,9 @@ export default function MyAppointmentsPage() {
           </div>
         </div>
 
-        {filteredAppointments.length > 0 ? (
+        {loading && <p role="status">Cargando tus citas...</p>}
+
+        {!loading && !error && filteredAppointments.length > 0 ? (
           <div className="appointments-list">
             {[...filteredAppointments].reverse().map((appointment) => (
               <AppointmentCard
@@ -176,14 +180,16 @@ export default function MyAppointmentsPage() {
               />
             ))}
           </div>
-        ) : (
+        ) : !loading && !error ? (
           <div className="empty-appointments">
             <div className="empty-icon">📅</div>
 
             <h3>No hay citas</h3>
 
             <p>
-              No se encontraron citas con los filtros aplicados.
+              {appointments.length === 0
+                ? 'Aún no tienes citas registradas en tu cuenta.'
+                : 'No se encontraron citas con los filtros aplicados.'}
             </p>
 
             <Link
@@ -193,7 +199,7 @@ export default function MyAppointmentsPage() {
               + Reservar cita
             </Link>
           </div>
-        )}
+        ) : null}
       </section>
     </main>
   );

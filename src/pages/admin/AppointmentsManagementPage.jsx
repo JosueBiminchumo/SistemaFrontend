@@ -26,6 +26,7 @@ export default function AppointmentsManagementPage() {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [appointmentToCancel, setAppointmentToCancel] = useState(null);
   const [loadError, setLoadError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     listAppointments()
@@ -42,7 +43,8 @@ export default function AppointmentsManagementPage() {
           CANCELLED: 'CANCELADA',
         }[item.status] ?? item.status,
       }))))
-      .catch((requestError) => setLoadError(requestError.message));
+      .catch((requestError) => setLoadError(requestError.message))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const filteredAppointments = useMemo(() => {
@@ -118,18 +120,25 @@ export default function AppointmentsManagementPage() {
         </select>
       </section>
 
-      <section className="appointments-management-card">
-        <AppointmentTable
-          appointments={filteredAppointments}
-          onView={setSelectedAppointment}
-          onCancel={setAppointmentToCancel}
-        />
+      {isLoading ? (
+        <p role="status">Cargando citas desde la base de datos...</p>
+      ) : !loadError ? (
+        <section className="appointments-management-card">
+          <AppointmentTable
+            appointments={filteredAppointments}
+            onView={setSelectedAppointment}
+            onCancel={setAppointmentToCancel}
+            emptyMessage={appointments.length === 0
+              ? 'Todavía no hay citas registradas en la base de datos.'
+              : 'No se encontraron citas con los filtros seleccionados.'}
+          />
 
-        <footer className="appointments-management-footer">
-          Mostrando {filteredAppointments.length} de {appointments.length}{' '}
-          citas
-        </footer>
-      </section>
+          <footer className="appointments-management-footer">
+            Mostrando {filteredAppointments.length} de {appointments.length}{' '}
+            citas
+          </footer>
+        </section>
+      ) : null}
 
       {selectedAppointment && (
         <div

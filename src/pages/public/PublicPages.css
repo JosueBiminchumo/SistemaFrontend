@@ -28,6 +28,10 @@
     var(--color-bg);
 }
 
+.public-page--home {
+  min-height: 100vh;
+}
+
 .hero-section {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.75fr);
@@ -261,6 +265,17 @@
 
 .public-section--compact {
   padding-top: 18px;
+}
+
+.home-doctors .section-heading p {
+  margin-top: 8px;
+  color: var(--color-muted);
+}
+
+.home-doctors .doctor-grid {
+  width: 100%;
+  padding-inline: 0;
+  padding-bottom: 24px;
 }
 
 .section-heading {

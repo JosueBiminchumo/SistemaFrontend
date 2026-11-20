@@ -45,6 +45,7 @@ export default function SpecialtiesManagementPage() {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
   const [loadError, setLoadError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     listSpecialties()
@@ -53,7 +54,8 @@ export default function SpecialtiesManagementPage() {
         description: item.description ?? '',
         icon: 'stethoscope',
       }))))
-      .catch((requestError) => setLoadError(requestError.message));
+      .catch((requestError) => setLoadError(requestError.message))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const filteredSpecialties = useMemo(() => {
@@ -158,13 +160,14 @@ export default function SpecialtiesManagementPage() {
       <header className="specialties-page__header">
         <div>
           <h1>Gestión de especialidades</h1>
-          <p>{specialties.length} especialidades registradas</p>
+          <p>{isLoading ? 'Cargando catálogo...' : `${specialties.length} especialidades registradas`}</p>
         </div>
 
         <button
           type="button"
           className="specialties-page__new-button"
           onClick={openNewModal}
+          disabled={isLoading || Boolean(loadError)}
         >
           <Plus size={17} />
           Nueva especialidad
@@ -183,9 +186,13 @@ export default function SpecialtiesManagementPage() {
         />
       </label>
 
-      {filteredSpecialties.length === 0 ? (
+      {isLoading ? (
+        <p role="status">Cargando especialidades desde la base de datos...</p>
+      ) : loadError ? null : filteredSpecialties.length === 0 ? (
         <div className="specialties-page__empty">
-          No se encontraron especialidades.
+          {specialties.length === 0
+            ? 'Aún no hay especialidades registradas.'
+            : 'No se encontraron especialidades con ese filtro.'}
         </div>
       ) : (
         <section className="specialties-grid">

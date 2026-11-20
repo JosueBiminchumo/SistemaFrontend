@@ -56,6 +56,22 @@ El registro se puede deshabilitar en despliegues existentes con
 `AUTH_REGISTRATION_ENABLED=false`. La duración del token se configura con
 `JWT_EXPIRATION_MS` (por defecto, una hora).
 
+## Crear un administrador inicial
+
+La aplicación no tiene una tabla separada para administradores: el rol `ADMIN`
+se guarda en `users`. Para crear el primer administrador en Railway, configura
+en el servicio del backend las variables `BOOTSTRAP_ADMIN_ENABLED=true`,
+`BOOTSTRAP_ADMIN_FIRST_NAME`, `BOOTSTRAP_ADMIN_LAST_NAME`,
+`BOOTSTRAP_ADMIN_EMAIL` y `BOOTSTRAP_ADMIN_PASSWORD`, y luego reinicia o
+despliega el servicio. Usa una contraseña privada de al menos 8 caracteres;
+no la pongas en Git. Al iniciar, el backend guarda el hash BCrypt en `users`.
+
+El alta es idempotente: una cuenta ADMIN activa existente no se modifica; si
+el correo ya pertenece a otro rol o a una cuenta inactiva, el arranque falla
+explícitamente. Después de confirmar el alta, desactiva
+`BOOTSTRAP_ADMIN_ENABLED` y elimina `BOOTSTRAP_ADMIN_PASSWORD` de las variables
+del servicio.
+
 Ejemplo de registro:
 
 ```json

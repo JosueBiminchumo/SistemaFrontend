@@ -77,9 +77,18 @@ Las fechas de cita se envían como fecha/hora ISO local (`YYYY-MM-DDTHH:mm:ss`) 
 
 La documentación OpenAPI está disponible en `/swagger-ui/index.html`. CORS se configura mediante `CORS_ALLOWED_ORIGINS`, separado por comas; el valor local predeterminado permite `http://localhost:*`.
 
-## Esquema MySQL existente
+## Esquema MySQL
 
-No se modificaron las migraciones ni la configuración de conexión MySQL. Para iniciar con los módulos clínicos, la base ya configurada debe contener las tablas `specialties`, `doctors`, `doctor_schedules` y `citas` con las columnas y relaciones del esquema que ya usa el equipo; Hibernate mantiene `ddl-auto: validate` y detendrá el arranque si el esquema no coincide. Las pruebas crean un esquema temporal H2 y no escriben en MySQL.
+Flyway crea el esquema al iniciar una base nueva: V1 crea `users`, V2 crea
+`patients`, V3 crea `specialties`, `doctors`, `doctor_schedules` y `citas`, y V4
+agrega un catálogo sintético para demostración. Hibernate conserva
+`ddl-auto: validate`, por lo que comprueba que las migraciones coincidan con las
+entidades sin alterar el esquema. Las pruebas usan un esquema temporal H2 y no
+escriben en MySQL.
+
+El catálogo de demostración contiene dos médicos y sus horarios entre semana.
+Sus cuentas usan contraseñas aleatorias desconocidas y no son cuentas de acceso;
+registra un paciente real en la aplicación para probar una reserva.
 
 ## Crear una base local nueva
 
@@ -89,8 +98,9 @@ con una cuenta administradora. Reemplaza el marcador de contraseña antes de
 ejecutarlo. El script no elimina ni modifica tablas existentes; usa
 `CREATE TABLE IF NOT EXISTS`.
 
-Como el script crea las tablas de las migraciones V1 y V2, configura Flyway para
-tomar la versión 2 como línea base al iniciar esta base nueva:
+Como el script crea todas las tablas hasta V3, configura Flyway para tomar la
+versión 3 como línea base. Así se omiten las migraciones de esquema ya creadas
+manualmente y se aplica V4 para sembrar el catálogo:
 
 ```powershell
 $env:DB_URL = "jdbc:mysql://localhost:3306/mediturno?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
@@ -103,7 +113,7 @@ try {
     [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer)
 }
 $env:SPRING_FLYWAY_BASELINE_ON_MIGRATE = "true"
-$env:SPRING_FLYWAY_BASELINE_VERSION = "2"
+$env:SPRING_FLYWAY_BASELINE_VERSION = "3"
 $random = [Security.Cryptography.RandomNumberGenerator]::Create()
 $jwtBytes = New-Object byte[] 32
 $random.GetBytes($jwtBytes)

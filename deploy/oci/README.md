@@ -32,14 +32,10 @@ HeatWave database; credentials stay in `.env.oci` and are not baked into images.
    docker compose --env-file .env.oci -f compose.oci.yaml logs -f api
    ```
 
-The database must already have the schema expected by the backend. Hibernate
-validates it at startup and does not create clinical tables automatically.
-Keep the OCI database credentials out of Git and do not give the app account
-administrator privileges.
-
-For a disposable class demonstration, run
-[`backend/scripts/seed-demo-catalog.sql`](../../backend/scripts/seed-demo-catalog.sql)
-after the schema exists. It adds two synthetic doctors, two specialties, and
-weekday schedules so a registered patient can create a real appointment. The
-appointment is stored by the API in MySQL; do not use the frontend's local demo
-administrator account to test persistence.
+Flyway applies the versioned schema migrations at startup, and Hibernate
+validates the resulting schema. The migrations also add two synthetic doctors,
+two specialties, and weekday schedules so a registered patient can create a
+real appointment. Keep the OCI database credentials out of Git and do not give
+the app account administrator privileges. The appointment is stored by the API
+in MySQL; do not use the frontend's local demo administrator account to test
+persistence.

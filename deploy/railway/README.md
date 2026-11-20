@@ -41,7 +41,7 @@ at $0. Verify the current plan and usage in Railway before deployment:
    DB_URL=jdbc:mysql://${{MySQL.MYSQLHOST}}:${{MySQL.MYSQLPORT}}/${{MySQL.MYSQLDATABASE}}?serverTimezone=UTC
    DB_USERNAME=${{MySQL.MYSQLUSER}}
    DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
-   JWT_SECRET=<unique-secret-of-at-least-32-random-bytes>
+   JWT_SECRET=<Base64-encoded-secret-from-at-least-32-random-bytes>
    CORS_ALLOWED_ORIGINS=https://<frontend-domain>
    ```
 
@@ -56,9 +56,11 @@ at $0. Verify the current plan and usage in Railway before deployment:
    generate a Railway domain for the frontend.
 4. Put the generated frontend origin in `CORS_ALLOWED_ORIGINS` on the backend
    service, then redeploy the backend.
-5. On the first successful API startup, Flyway creates the schema. Run
-   `backend/scripts/seed-demo-catalog.sql` against the `mediturno` database,
-   register a patient through the app, and book a test appointment.
+5. On the first API startup, Flyway creates the schema and inserts the
+   demonstration specialties, doctors, and schedules. Register a patient
+   through the app and book a test appointment; the appointment is stored in
+   MySQL. `ddl-auto` remains `validate`, so schema changes stay versioned in
+   Flyway rather than being made implicitly by Hibernate.
 
 Keep the MySQL service private. To let the instructor inspect the tables,
 create a separate read-only MySQL user and provide access only for the demo;

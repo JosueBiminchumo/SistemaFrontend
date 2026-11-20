@@ -7,10 +7,6 @@ function normalizeRole(role) {
 function parseJwt(token) {
   if (!token || typeof token !== 'string') return null;
 
-  if (token.startsWith('local-token-')) {
-    return { role: token.replace('local-token-', '').trim(), exp: Date.now() + 86400000 };
-  }
-
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -59,6 +55,15 @@ export const register = async (userData) => {
   }
 };
 
+export const getCurrentUser = async () => {
+  try {
+    const { data } = await api.get('/auth/me');
+    return data;
+  } catch (error) {
+    throw new Error(error.message || 'Error al cargar la cuenta', { cause: error });
+  }
+};
+
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('mediturn_user');
@@ -67,13 +72,7 @@ export const logout = () => {
 export const getToken = () => localStorage.getItem('token');
 
 export const isAuthenticated = () => {
-  const storedUser = getStoredUser();
   const token = getToken();
-
-  if (storedUser && (storedUser.role || storedUser.rol)) {
-    return true;
-  }
-
   if (!token) return false;
 
   const payload = parseJwt(token);
@@ -84,6 +83,8 @@ export const isAuthenticated = () => {
 };
 
 export const getUserRole = () => {
+  if (!getToken()) return null;
+
   const storedUser = getStoredUser();
   if (storedUser?.role || storedUser?.rol) {
     return normalizeRole(storedUser.role || storedUser.rol);
@@ -106,6 +107,6 @@ export const roleToHomeRoute = (role) => {
     case 'PACIENTE':
     case 'PATIENT':
     default:
-      return '/paciente/inicio';
+      return '/paciente';
   }
 };

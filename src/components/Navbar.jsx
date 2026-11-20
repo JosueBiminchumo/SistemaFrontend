@@ -1,25 +1,37 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-
-const dashboardByRole = {
-  paciente: '/paciente/inicio',
-  medico: '/medico/dashboard',
-  admin: '/admin/dashboard',
-};
+import {
+  getCurrentUser,
+  isAuthenticated,
+  logout,
+  roleToHomeRoute,
+} from '../services/authService';
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const storedUser = localStorage.getItem('mediturn_user');
-  const user = storedUser ? JSON.parse(storedUser) : null;
-  const dashboardPath = user ? dashboardByRole[user.role] : null;
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState('');
+  const dashboardPath = user ? roleToHomeRoute(user.role) : null;
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      getCurrentUser()
+        .then(setUser)
+        .catch((requestError) => setError(requestError.message));
+    }
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('mediturn_user');
-    localStorage.removeItem('token');
+    logout();
+    setUser(null);
+    setError('');
     navigate('/login');
   };
 
   return (
+    <>
+    {error && <p role="alert">{error}</p>}
     <nav className="navbar">
       <Link className="navbar__brand" to="/">
         <span className="navbar__mark">M</span>
@@ -60,5 +72,6 @@ export default function Navbar() {
         )}
       </div>
     </nav>
+    </>
   );
 }

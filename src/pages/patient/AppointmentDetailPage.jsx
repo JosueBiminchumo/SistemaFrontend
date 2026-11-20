@@ -1,66 +1,32 @@
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { cancelAppointment, getAppointment } from '../../services/appointmentService';
 import './AppointmentDetailPage.css';
 
 const statusLabels = {
-  confirmed: 'Confirmada',
-  pending: 'Pendiente',
-  cancelled: 'Cancelada',
-  completed: 'Completada',
-  atendida: 'Completada',
+  CONFIRMED: 'Confirmada',
+  PENDING: 'Pendiente',
+  CANCELLED: 'Cancelada',
+  COMPLETED: 'Completada',
 };
 
 export default function AppointmentDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [appointment, setAppointment] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const appointments = JSON.parse(
-    localStorage.getItem('appointments') || '[]'
-  );
+  useEffect(() => {
+    getAppointment(id)
+      .then(setAppointment)
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  const currentUser = JSON.parse(
-    localStorage.getItem('mediturn_user')
-  );
-
-  const patients = JSON.parse(
-    localStorage.getItem('patients') || '[]'
-  );
-
-  const currentPatient = patients.find(
-    (patient) => patient.id === currentUser.id
-  );
-
-  const appointment = appointments.find(
-    (item) =>
-      String(item.id) === id &&
-      item.patientId === currentUser.id
-  );
-
-  if (!appointment) {
-    return (
-      <main className="appointment-detail-page">
-        <section className="appointment-detail-container">
-          <button
-            type="button"
-            className="back-detail-button"
-            onClick={() => navigate(-1)}
-          >
-            ← Volver
-          </button>
-
-          <div className="appointment-detail-header">
-            <div>
-              <h1>Cita no encontrada</h1>
-              <p>No se encontró la cita solicitada.</p>
-            </div>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  const handleCancel = () => {
-    Swal.fire({
+  const handleCancel = async () => {
+    const result = await Swal.fire({
       title: '¿Cancelar esta cita?',
       text: 'La cita pasará a estado cancelada.',
       icon: 'question',
@@ -70,85 +36,73 @@ export default function AppointmentDetailPage() {
       reverseButtons: true,
       confirmButtonColor: '#2563eb',
       cancelButtonColor: '#e2e8f0',
-      customClass: {
-        cancelButton: 'swal-cancel-button',
-      },
-    }).then((result) => {
-      if (!result.isConfirmed) {
-        return;
-      }
+      customClass: { cancelButton: 'swal-cancel-button' },
+    });
 
-      const updatedAppointments = appointments.map(
-        (currentAppointment) =>
-          currentAppointment.id === appointment.id
-            ? {
-                ...currentAppointment,
-                status: 'cancelled',
-              }
-            : currentAppointment
-      );
+    if (!result.isConfirmed) return;
 
-      localStorage.setItem(
-        'appointments',
-        JSON.stringify(updatedAppointments)
-      );
-
-      Swal.fire({
+    try {
+      setAppointment(await cancelAppointment(appointment.id));
+      await Swal.fire({
         title: 'Cita cancelada',
         text: 'Tu cita ha sido cancelada correctamente.',
         icon: 'success',
-        confirmButtonText: 'Aceptar',
+        confirmButtonText: 'Ver mis citas',
         confirmButtonColor: '#2563eb',
-      }).then(() => {
-        navigate('/paciente/mis-citas');
       });
-    });
+      navigate('/paciente/mis-citas');
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   };
 
-  const statusClass = `status-${appointment.status}`;
+  if (loading) {
+    return <main className="appointment-detail-page"><p role="status">Cargando cita...</p></main>;
+  }
+
+  if (!appointment) {
+    return (
+      <main className="appointment-detail-page">
+        <section className="appointment-detail-container">
+          <button type="button" className="back-detail-button" onClick={() => navigate(-1)}>
+            ← Volver
+          </button>
+          <div className="appointment-detail-header">
+            <div>
+              <h1>Cita no encontrada</h1>
+              <p role="alert">{error || 'No se encontró la cita solicitada.'}</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  const statusClass = `status-${appointment.status.toLowerCase()}`;
 
   return (
     <main className="appointment-detail-page">
       <section className="appointment-detail-container">
-        <button
-          type="button"
-          className="back-detail-button"
-          onClick={() => navigate(-1)}
-        >
+        <button type="button" className="back-detail-button" onClick={() => navigate(-1)}>
           ← Volver
         </button>
 
         <div className="appointment-detail-header">
           <div>
             <h1>Detalle de cita</h1>
-            <p>Información de tu cita médica.</p>
+            <p>Información registrada para tu cita médica.</p>
           </div>
-
           <span className={`detail-status ${statusClass}`}>
-            {statusLabels[appointment.status] || 'Pendiente'}
+            {statusLabels[appointment.status] ?? appointment.status}
           </span>
         </div>
 
-        <section className="doctor-section">
-          <div className="doctor-avatar">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M11 2v6" />
-              <path d="M15 2v6" />
-              <path d="M9 8h8a2 2 0 0 1 2 2v2a5 5 0 0 1-5 5v0" />
-              <path d="M14 17v2a2 2 0 0 1-2 2h0a2 2 0 0 1-2-2v-2" />
-              <circle cx="20" cy="10" r="2" />
-            </svg>
-          </div>
+        {error && <p role="alert">{error}</p>}
 
+        <section className="doctor-section">
+          <div className="doctor-avatar" aria-hidden="true">🩺</div>
           <div>
-            <h2>{appointment.doctor}</h2>
+            <h2>{appointment.doctorName}</h2>
             <p>{appointment.specialty}</p>
           </div>
         </section>
@@ -156,72 +110,37 @@ export default function AppointmentDetailPage() {
         <section className="appointment-detail-info">
           <div className="detail-item">
             <span>Fecha</span>
-            <strong>{appointment.date}</strong>
+            <strong>{appointment.startAt.slice(0, 10)}</strong>
           </div>
-
           <div className="detail-item">
             <span>Hora</span>
-            <strong>{appointment.time}</strong>
+            <strong>{appointment.startAt.slice(11, 16)}</strong>
           </div>
-
           <div className="detail-item">
             <span>Paciente</span>
-            <strong>
-              {currentPatient
-                ? `${currentPatient.firstName} ${currentPatient.lastName}`
-                : 'Paciente'}
-            </strong>
-          </div>
-
-          <div className="detail-item">
-            <span>Modalidad</span>
-            <strong>Presencial</strong>
+            <strong>{appointment.patientName}</strong>
           </div>
         </section>
 
         <section className="reason-section">
           <h3>Motivo de la consulta</h3>
-
-          <p>
-            {appointment.reason ||
-              'No se registró un motivo para esta cita.'}
-          </p>
+          <p>{appointment.reason}</p>
         </section>
 
-        <section className="observations-section">
-          <h3>Observaciones</h3>
-
-          <p>
-            {appointment.observations ||
-              'No se registraron observaciones para esta cita.'}
-          </p>
-        </section>
-
-        {appointment.status !== 'cancelled' &&
-          appointment.status !== 'completed' &&
-          appointment.status !== 'atendida' && (
-            <div className="detail-actions">
-              <button
-                type="button"
-                className="reschedule-button"
-                onClick={() =>
-                  navigate(
-                    `/paciente/cita/${appointment.id}/reprogramar`
-                  )
-                }
-              >
-                Reprogramar cita
-              </button>
-
-              <button
-                type="button"
-                className="cancel-button"
-                onClick={handleCancel}
-              >
-                Cancelar cita
-              </button>
-            </div>
-          )}
+        {['PENDING', 'CONFIRMED'].includes(appointment.status) && (
+          <div className="detail-actions">
+            <button
+              type="button"
+              className="reschedule-button"
+              onClick={() => navigate(`/paciente/cita/${appointment.id}/reprogramar`)}
+            >
+              Reprogramar cita
+            </button>
+            <button type="button" className="cancel-button" onClick={handleCancel}>
+              Cancelar cita
+            </button>
+          </div>
+        )}
       </section>
     </main>
   );

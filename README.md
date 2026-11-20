@@ -14,7 +14,12 @@ El sistema cuenta con accesos diferenciados para tres tipos de usuarios[cite: 1]
 
 * **Paciente:** Consulta médicos y horarios; reserva, cancela o reprograma citas; revisa su historial[cite: 1].
 * **Médico:** Administra su disponibilidad, consulta su agenda y actualiza el estado de las citas[cite: 1].
-* **Administrador:** Gestiona usuarios, médicos, pacientes, especialidades y citas; consulta indicadores básicos[cite: 1].
+* **Administrador:** Gestiona especialidades y citas; consulta indicadores del sistema.
+
+Los registros de médicos, pacientes, horarios y citas que muestra el frontend se
+consultan o actualizan mediante la API del backend y se persisten en MySQL.
+`localStorage` conserva únicamente la sesión autenticada; ya no se usa como
+almacén de datos de negocio ni como fuente de cuentas de demostración.
 
 ## Backend
 

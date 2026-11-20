@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mediturno.backend.appointment.dto.AppointmentRequest;
 import com.mediturno.backend.appointment.dto.AppointmentResponse;
+import com.mediturno.backend.appointment.dto.AppointmentStatusRequest;
 import com.mediturno.backend.appointment.service.AppointmentService;
 import com.mediturno.backend.user.domain.User;
 
@@ -61,5 +62,13 @@ public class AppointmentController {
     @PatchMapping("/{id}/cancel")
     public AppointmentResponse cancel(@PathVariable Long id, @AuthenticationPrincipal User user) {
         return appointmentService.cancel(id, user.getUsername(), user.getRole());
+    }
+
+    @PatchMapping("/{id}/status")
+    public AppointmentResponse updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody AppointmentStatusRequest request,
+            @AuthenticationPrincipal User user) {
+        return appointmentService.updateStatus(id, request, user.getUsername(), user.getRole());
     }
 }

@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { weekDays } from '../pages/doctor/doctorStorage';
+import { weekDays } from '../pages/doctor/doctorScheduleConstants';
 
 export default function ScheduleForm({ onAdd, onCancel }) {
   const [day, setDay] = useState(weekDays[0]);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [slotMinutes, setSlotMinutes] = useState('30');
   const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
@@ -21,7 +22,7 @@ export default function ScheduleForm({ onAdd, onCancel }) {
       return;
     }
 
-    onAdd({ day, startTime, endTime });
+    onAdd({ day, startTime, endTime, slotMinutes: Number(slotMinutes) });
     setStartTime('');
     setEndTime('');
   };
@@ -60,6 +61,19 @@ export default function ScheduleForm({ onAdd, onCancel }) {
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
           />
+        </div>
+        <div className="schedule-form__field">
+          <label htmlFor="slotMinutes">Duración de cada cita</label>
+          <select
+            id="slotMinutes"
+            value={slotMinutes}
+            onChange={(e) => setSlotMinutes(e.target.value)}
+          >
+            <option value="15">15 minutos</option>
+            <option value="30">30 minutos</option>
+            <option value="45">45 minutos</option>
+            <option value="60">60 minutos</option>
+          </select>
         </div>
       </div>
 

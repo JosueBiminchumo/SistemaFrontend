@@ -1,60 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { listAppointments } from '../../services/appointmentService';
+import { getCurrentUser } from '../../services/authService';
 import './PatientDashboard.css';
-
-function getAppointments() {
-  const storedUser = localStorage.getItem('mediturn_user');
-  const storedAppointments = localStorage.getItem('appointments');
-
-  if (!storedUser || !storedAppointments) {
-    return [];
-  }
-
-  const currentUser = JSON.parse(storedUser);
-  const appointments = JSON.parse(storedAppointments);
-
-  return appointments.filter(
-    (appointment) => appointment.patientId === currentUser.id
-  );
-}
-
-function getProfile() {
-  const storedUser = localStorage.getItem('mediturn_user');
-  const storedPatients = localStorage.getItem('patients');
-
-  if (!storedUser) {
-    return {
-      firstName: 'Paciente',
-      lastName: '',
-    };
-  }
-
-  const currentUser = JSON.parse(storedUser);
-  const token = localStorage.getItem('token');
-  if (currentUser.isLocal === false || (token && !token.startsWith('local-token-'))) {
-    return {
-      firstName: currentUser.firstName || currentUser.name?.split(' ')[0] || 'Paciente',
-      lastName: currentUser.lastName || currentUser.name?.split(' ').slice(1).join(' ') || '',
-    };
-  }
-
-  if (!storedPatients) {
-    return {
-      firstName: 'Paciente',
-      lastName: '',
-    };
-  }
-
-  const patients = JSON.parse(storedPatients);
-
-  return (
-    patients.find(
-      (patient) => patient.id === currentUser.id
-    ) || {
-      firstName: 'Paciente',
-      lastName: '',
-    }
-  );
-}
 
 function formatDate(date) {
   if (!date) {
@@ -92,15 +40,47 @@ function formatDate(date) {
 }
 
 export default function PatientDashboard() {
-  const profile = getProfile();
-  const appointments = getAppointments();
-  const recentAppointments = [...appointments].reverse();
+  const [profile, setProfile] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const activeAppointments = recentAppointments.filter(
-    (appointment) => appointment.status !== 'cancelled'
+  useEffect(() => {
+    Promise.all([getCurrentUser(), listAppointments()])
+      .then(([user, items]) => {
+        setProfile(user);
+        setAppointments(items.map((appointment) => ({
+          ...appointment,
+          doctor: appointment.doctorName,
+          date: appointment.startAt.slice(0, 10),
+          time: appointment.startAt.slice(11, 16),
+          status: appointment.status.toLowerCase(),
+        })));
+      })
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <main className="patient-dashboard"><p role="status">Cargando tus datos...</p></main>;
+  }
+
+  if (error) {
+    return <main className="patient-dashboard"><p role="alert">{error}</p></main>;
+  }
+
+  const recentAppointments = [...appointments].sort(
+    (left, right) => right.startAt.localeCompare(left.startAt)
   );
 
-  const nextAppointment = activeAppointments[0];
+  const activeAppointments = recentAppointments.filter(
+    (appointment) =>
+      ['pending', 'confirmed'].includes(appointment.status)
+  );
+
+  const nextAppointment = activeAppointments
+    .filter((appointment) => new Date(appointment.startAt) >= new Date())
+    .sort((left, right) => new Date(left.startAt) - new Date(right.startAt))[0];
 
   const completedAppointments = recentAppointments.filter(
     (appointment) =>

@@ -1,25 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { listAppointments } from '../../services/appointmentService';
 import './PatientHistoryPage.css';
 
-function getAppointments() {
-  const storedUser = localStorage.getItem('mediturn_user');
-  const storedAppointments = localStorage.getItem('appointments');
-
-  if (!storedUser || !storedAppointments) {
-    return [];
-  }
-
-  const currentUser = JSON.parse(storedUser);
-  const appointments = JSON.parse(storedAppointments);
-
-  return appointments.filter(
-    (appointment) => appointment.patientId === currentUser.id
-  );
-}
-
 function getStatusLabel(status) {
-  if (status === 'completed' || status === 'atendida') {
+  if (status === 'COMPLETED') {
     return 'Completada';
   }
 
@@ -28,22 +13,29 @@ function getStatusLabel(status) {
 
 export default function PatientHistoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const appointments = getAppointments();
+  useEffect(() => {
+    listAppointments()
+      .then(setAppointments)
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   const historyAppointments = appointments.filter(
     (appointment) =>
-      appointment.status === 'completed' ||
-      appointment.status === 'atendida' ||
-      appointment.status === 'cancelled'
+      appointment.status === 'COMPLETED' ||
+      appointment.status === 'CANCELLED'
   );
 
   const filteredAppointments = historyAppointments.filter((appointment) => {
     const search = searchTerm.toLowerCase();
 
     return (
-      appointment.doctor?.toLowerCase().includes(search) ||
+      appointment.doctorName?.toLowerCase().includes(search) ||
       appointment.specialty?.toLowerCase().includes(search) ||
       appointment.reason?.toLowerCase().includes(search)
     );
@@ -67,6 +59,9 @@ export default function PatientHistoryPage() {
           </div>
         </div>
 
+        {loading && <p role="status">Cargando historial...</p>}
+        {error && <p role="alert">{error}</p>}
+
         <div className="history-search-box">
           <svg
             viewBox="0 0 24 24"
@@ -88,7 +83,7 @@ export default function PatientHistoryPage() {
           />
         </div>
 
-        {filteredAppointments.length > 0 ? (
+        {!loading && filteredAppointments.length > 0 ? (
           <div className="history-table-wrapper">
             <table className="history-table">
               <thead>
@@ -103,21 +98,19 @@ export default function PatientHistoryPage() {
 
               <tbody>
                 {[...filteredAppointments].reverse().map((appointment) => {
-                  const isCompleted =
-                    appointment.status === 'completed' ||
-                    appointment.status === 'atendida';
+                  const isCompleted = appointment.status === 'COMPLETED';
 
                   return (
                     <tr key={appointment.id}>
                       <td className="history-doctor">
-                        {appointment.doctor}
+                        {appointment.doctorName}
                       </td>
 
                       <td>{appointment.specialty}</td>
 
-                      <td>{appointment.date}</td>
+                      <td>{appointment.startAt.slice(0, 10)}</td>
 
-                      <td>{appointment.time}</td>
+                      <td>{appointment.startAt.slice(11, 16)}</td>
 
                       <td>
                         <div className="history-status-cell">
@@ -161,7 +154,7 @@ export default function PatientHistoryPage() {
               </tbody>
             </table>
           </div>
-        ) : (
+        ) : !loading && !error ? (
           <div className="history-empty">
             <div className="history-empty-icon">📋</div>
 
@@ -171,7 +164,7 @@ export default function PatientHistoryPage() {
               No se encontraron citas completadas o canceladas.
             </p>
           </div>
-        )}
+        ) : null}
       </section>
     </main>
   );

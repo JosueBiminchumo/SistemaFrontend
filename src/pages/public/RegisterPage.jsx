@@ -20,7 +20,6 @@ export default function RegisterPage() {
         email: user.email,
         role: user.role,
         dashboardPath: '/paciente',
-        isLocal: false,
       })
     );
     navigate('/paciente/perfil');

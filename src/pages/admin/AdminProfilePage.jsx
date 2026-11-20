@@ -1,378 +1,103 @@
-import { useState } from 'react';
-import {
-  Camera,
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
-  Phone,
-  Save,
-  UserRound,
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Mail, ShieldCheck, UserRound } from 'lucide-react';
 
+import { getCurrentUser } from '../../services/authService';
 import './AdminProfilePage.css';
 
-const initialProfile = {
-  names: 'Admin',
-  lastNames: 'MediTurno',
-  email: 'admin@mediturno.pe',
-  phone: '987654321',
-};
-
-const initialPasswords = {
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: '',
+const roleLabels = {
+  ADMIN: 'Administrador',
+  DOCTOR: 'Médico',
+  PATIENT: 'Paciente',
 };
 
 export default function AdminProfilePage() {
-  const [profile, setProfile] = useState(initialProfile);
-  const [passwords, setPasswords] = useState(initialPasswords);
-  const [profileMessage, setProfileMessage] = useState('');
-  const [passwordMessage, setPasswordMessage] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [visiblePasswords, setVisiblePasswords] = useState({
-    currentPassword: false,
-    newPassword: false,
-    confirmPassword: false,
-  });
+  const [profile, setProfile] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const handleProfileChange = (event) => {
-    const { name, value } = event.target;
+  useEffect(() => {
+    getCurrentUser()
+      .then(setProfile)
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, []);
 
-    setProfile((currentProfile) => ({
-      ...currentProfile,
-      [name]: value,
-    }));
-
-    setProfileMessage('');
-  };
-
-  const handlePasswordChange = (event) => {
-    const { name, value } = event.target;
-
-    setPasswords((currentPasswords) => ({
-      ...currentPasswords,
-      [name]: value,
-    }));
-
-    setPasswordMessage('');
-    setPasswordError('');
-  };
-
-  const handleProfileSubmit = (event) => {
-    event.preventDefault();
-
-    const requiredValues = [
-      profile.names,
-      profile.lastNames,
-      profile.email,
-      profile.phone,
-    ];
-
-    if (requiredValues.some((value) => !value.trim())) {
-      setProfileMessage(
-        'Todos los campos de información personal son obligatorios.',
-      );
-      return;
-    }
-
-    setProfileMessage('Información personal actualizada correctamente.');
-  };
-
-  const handlePasswordSubmit = (event) => {
-    event.preventDefault();
-
-    if (
-      !passwords.currentPassword ||
-      !passwords.newPassword ||
-      !passwords.confirmPassword
-    ) {
-      setPasswordError('Completa todos los campos de contraseña.');
-      return;
-    }
-
-    if (passwords.newPassword.length < 8) {
-      setPasswordError(
-        'La nueva contraseña debe tener al menos 8 caracteres.',
-      );
-      return;
-    }
-
-    if (passwords.newPassword !== passwords.confirmPassword) {
-      setPasswordError('Las nuevas contraseñas no coinciden.');
-      return;
-    }
-
-    setPasswords(initialPasswords);
-    setPasswordError('');
-    setPasswordMessage('Contraseña actualizada correctamente.');
-  };
-
-  const togglePasswordVisibility = (field) => {
-    setVisiblePasswords((currentVisibility) => ({
-      ...currentVisibility,
-      [field]: !currentVisibility[field],
-    }));
-  };
+  const initials = profile
+    ? `${profile.firstName?.[0] ?? ''}${profile.lastName?.[0] ?? ''}`.toUpperCase()
+    : '';
+  const role = roleLabels[profile?.role] ?? profile?.role ?? '';
 
   return (
     <main className="admin-profile-page">
       <header className="admin-profile-page__header">
         <h1>Configuración</h1>
-        <p>Administra la información y seguridad de tu cuenta</p>
+        <p>Información de la cuenta registrada en la base de datos</p>
       </header>
 
-      <section className="admin-profile-grid">
-        <aside className="admin-profile-summary">
-          <div className="admin-profile-summary__avatar">
-            AM
+      {loading && <p role="status">Cargando información de la cuenta...</p>}
+      {error && <p role="alert">{error}</p>}
 
-            <button
-              type="button"
-              aria-label="Cambiar fotografía"
-              title="Cambiar fotografía"
-            >
-              <Camera size={16} />
-            </button>
-          </div>
+      {!loading && profile && (
+        <section className="admin-profile-grid">
+          <aside className="admin-profile-summary">
+            <div className="admin-profile-summary__avatar">{initials}</div>
+            <h2>{profile.firstName} {profile.lastName}</h2>
+            <span className="admin-profile-summary__role">{role}</span>
 
-          <h2>
-            {profile.names} {profile.lastNames}
-          </h2>
-
-          <span className="admin-profile-summary__role">
-            Administrador
-          </span>
-
-          <div className="admin-profile-summary__information">
-            <div>
-              <Mail size={17} />
-              <span>{profile.email}</span>
-            </div>
-
-            <div>
-              <Phone size={17} />
-              <span>{profile.phone}</span>
-            </div>
-          </div>
-
-          <p>
-            La fotografía de perfil se habilitará cuando el sistema se
-            conecte con el backend.
-          </p>
-        </aside>
-
-        <div className="admin-profile-forms">
-          <form
-            className="admin-profile-card"
-            onSubmit={handleProfileSubmit}
-          >
-            <div className="admin-profile-card__heading">
-              <div className="admin-profile-card__icon">
-                <UserRound size={20} />
-              </div>
-
+            <div className="admin-profile-summary__information">
               <div>
-                <h2>Información personal</h2>
-                <p>Actualiza los datos principales de tu cuenta</p>
+                <Mail size={17} />
+                <span>{profile.email}</span>
               </div>
             </div>
+          </aside>
 
-            <div className="admin-profile-form-grid">
-              <label>
-                Nombres
-                <input
-                  type="text"
-                  name="names"
-                  value={profile.names}
-                  onChange={handleProfileChange}
-                  maxLength={60}
-                />
-              </label>
-
-              <label>
-                Apellidos
-                <input
-                  type="text"
-                  name="lastNames"
-                  value={profile.lastNames}
-                  onChange={handleProfileChange}
-                  maxLength={60}
-                />
-              </label>
-
-              <label>
-                Correo electrónico
-                <input
-                  type="email"
-                  name="email"
-                  value={profile.email}
-                  onChange={handleProfileChange}
-                  maxLength={120}
-                />
-              </label>
-
-              <label>
-                Teléfono
-                <input
-                  type="tel"
-                  name="phone"
-                  value={profile.phone}
-                  onChange={handleProfileChange}
-                  maxLength={15}
-                />
-              </label>
-            </div>
-
-            {profileMessage && (
-              <p className="admin-profile-message">
-                {profileMessage}
-              </p>
-            )}
-
-            <footer className="admin-profile-card__footer">
-              <button type="submit">
-                <Save size={17} />
-                Guardar cambios
-              </button>
-            </footer>
-          </form>
-
-          <form
-            className="admin-profile-card"
-            onSubmit={handlePasswordSubmit}
-          >
-            <div className="admin-profile-card__heading">
-              <div className="admin-profile-card__icon">
-                <LockKeyhole size={20} />
+          <div className="admin-profile-forms">
+            <article className="admin-profile-card">
+              <div className="admin-profile-card__heading">
+                <div className="admin-profile-card__icon">
+                  <UserRound size={20} />
+                </div>
+                <div>
+                  <h2>Información personal</h2>
+                  <p>Datos de la cuenta autenticada</p>
+                </div>
               </div>
 
-              <div>
-                <h2>Seguridad</h2>
-                <p>Actualiza la contraseña de acceso</p>
+              <div className="admin-profile-form-grid">
+                <label>
+                  Nombres
+                  <input value={profile.firstName} readOnly />
+                </label>
+                <label>
+                  Apellidos
+                  <input value={profile.lastName} readOnly />
+                </label>
+                <label>
+                  Correo electrónico
+                  <input type="email" value={profile.email} readOnly />
+                </label>
+                <label>
+                  Rol
+                  <input value={role} readOnly />
+                </label>
               </div>
-            </div>
+            </article>
 
-            <div className="admin-password-fields">
-              <label>
-                Contraseña actual
-
-                <div className="admin-password-input">
-                  <input
-                    type={
-                      visiblePasswords.currentPassword
-                        ? 'text'
-                        : 'password'
-                    }
-                    name="currentPassword"
-                    value={passwords.currentPassword}
-                    onChange={handlePasswordChange}
-                    autoComplete="current-password"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      togglePasswordVisibility('currentPassword')
-                    }
-                    aria-label="Mostrar u ocultar contraseña actual"
-                  >
-                    {visiblePasswords.currentPassword ? (
-                      <EyeOff size={17} />
-                    ) : (
-                      <Eye size={17} />
-                    )}
-                  </button>
+            <article className="admin-profile-card">
+              <div className="admin-profile-card__heading">
+                <div className="admin-profile-card__icon">
+                  <ShieldCheck size={20} />
                 </div>
-              </label>
-
-              <label>
-                Nueva contraseña
-
-                <div className="admin-password-input">
-                  <input
-                    type={
-                      visiblePasswords.newPassword
-                        ? 'text'
-                        : 'password'
-                    }
-                    name="newPassword"
-                    value={passwords.newPassword}
-                    onChange={handlePasswordChange}
-                    autoComplete="new-password"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      togglePasswordVisibility('newPassword')
-                    }
-                    aria-label="Mostrar u ocultar nueva contraseña"
-                  >
-                    {visiblePasswords.newPassword ? (
-                      <EyeOff size={17} />
-                    ) : (
-                      <Eye size={17} />
-                    )}
-                  </button>
+                <div>
+                  <h2>Seguridad</h2>
+                  <p>La autenticación y los permisos se verifican en el servidor.</p>
                 </div>
-              </label>
-
-              <label>
-                Confirmar nueva contraseña
-
-                <div className="admin-password-input">
-                  <input
-                    type={
-                      visiblePasswords.confirmPassword
-                        ? 'text'
-                        : 'password'
-                    }
-                    name="confirmPassword"
-                    value={passwords.confirmPassword}
-                    onChange={handlePasswordChange}
-                    autoComplete="new-password"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      togglePasswordVisibility('confirmPassword')
-                    }
-                    aria-label="Mostrar u ocultar confirmación"
-                  >
-                    {visiblePasswords.confirmPassword ? (
-                      <EyeOff size={17} />
-                    ) : (
-                      <Eye size={17} />
-                    )}
-                  </button>
-                </div>
-              </label>
-            </div>
-
-            {passwordError && (
-              <p className="admin-profile-error">
-                {passwordError}
-              </p>
-            )}
-
-            {passwordMessage && (
-              <p className="admin-profile-message">
-                {passwordMessage}
-              </p>
-            )}
-
-            <footer className="admin-profile-card__footer">
-              <button type="submit">
-                <LockKeyhole size={17} />
-                Actualizar contraseña
-              </button>
-            </footer>
-          </form>
-        </div>
-      </section>
+              </div>
+            </article>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

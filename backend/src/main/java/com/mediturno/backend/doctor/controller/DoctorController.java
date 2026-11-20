@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mediturno.backend.doctor.dto.DoctorResponse;
+import com.mediturno.backend.doctor.dto.DoctorScheduleEntryResponse;
 import com.mediturno.backend.doctor.dto.DoctorScheduleResponse;
 import com.mediturno.backend.doctor.dto.DoctorScheduleUpdateRequest;
 import com.mediturno.backend.doctor.service.DoctorService;
@@ -46,6 +47,11 @@ public class DoctorController {
             @PathVariable Long id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return doctorService.getSchedule(id, date);
+    }
+
+    @GetMapping("/me/schedule")
+    public List<DoctorScheduleEntryResponse> ownSchedule(@AuthenticationPrincipal UserDetails user) {
+        return doctorService.getOwnSchedule(user.getUsername());
     }
 
     @PutMapping("/me/schedule")

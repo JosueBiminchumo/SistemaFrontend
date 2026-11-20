@@ -1,33 +1,36 @@
-import { useState } from 'react';
-import { getProfile, saveProfile } from './doctorStorage';
+import { useEffect, useState } from 'react';
+import { getCurrentUser } from '../../services/authService';
+import { listDoctors } from '../../services/doctorService';
 import DoctorLayout from './DoctorLayout';
 import './DoctorProfilePage.css';
 
 export default function DoctorProfilePage() {
-  const [profile, setProfile] = useState(() => getProfile());
-  const [form, setForm] = useState(profile);
-  const [isEditing, setIsEditing] = useState(false);
-  const [feedback, setFeedback] = useState('');
+  const [profile, setProfile] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const handleChange = (field) => (e) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
-  };
+  useEffect(() => {
+    Promise.all([getCurrentUser(), listDoctors()])
+      .then(([user, doctors]) => {
+        const doctor = doctors.find((item) => item.userId === user.id);
+        if (!doctor) {
+          throw new Error('No existe un perfil médico asociado a esta cuenta.');
+        }
+        setProfile({
+          name: `${doctor.firstName} ${doctor.lastName}`,
+          specialty: doctor.specialty,
+          email: user.email,
+          biography: doctor.biography,
+          licenseNumber: doctor.licenseNumber,
+        });
+      })
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    setProfile(form);
-    saveProfile(form);
-    setIsEditing(false);
-    setFeedback('Perfil actualizado correctamente.');
-    setTimeout(() => setFeedback(''), 2500);
-  };
-
-  const handleCancel = () => {
-    setForm(profile);
-    setIsEditing(false);
-  };
-
-  const initials = profile.name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+  const initials = profile
+    ? profile.name.split(' ').slice(0, 2).map((word) => word[0]).join('').toUpperCase()
+    : '';
 
   return (
     <DoctorLayout>
@@ -35,76 +38,35 @@ export default function DoctorProfilePage() {
         <header className="doctor-profile__header">
           <div>
             <h1>Mi perfil</h1>
-            <p className="doctor-profile__subtitle">Información visible para pacientes y administración</p>
+            <p className="doctor-profile__subtitle">Información registrada en el sistema</p>
           </div>
-
-          {!isEditing && (
-            <button type="button" className="btn btn--primary" onClick={() => setIsEditing(true)}>
-              ✎ Editar perfil
-            </button>
-          )}
         </header>
 
-        {feedback && <div className="doctor-profile__feedback">✓ {feedback}</div>}
+        {loading && <p role="status">Cargando perfil...</p>}
+        {error && <p role="alert">{error}</p>}
 
-        {!isEditing ? (
+        {!loading && profile && (
           <div className="doctor-profile__card">
             <div className="doctor-profile__banner" />
-
             <div className="doctor-profile__body">
               <div className="doctor-profile__avatar">{initials}</div>
-
               <h2 className="doctor-profile__name">{profile.name}</h2>
               <span className="doctor-profile__badge">{profile.specialty}</span>
-
               <div className="doctor-profile__details">
                 <div className="detail-item">
                   <span className="detail-item__icon">✉</span>
                   <span>{profile.email}</span>
                 </div>
                 <div className="detail-item">
-                  <span className="detail-item__icon">☎</span>
-                  <span>{profile.phone}</span>
+                  <span className="detail-item__icon">▣</span>
+                  <span>CMP {profile.licenseNumber}</span>
                 </div>
               </div>
-
-              <p className="doctor-profile__bio">{profile.bio}</p>
+              <p className="doctor-profile__bio">
+                {profile.biography || 'No hay una biografía registrada.'}
+              </p>
             </div>
           </div>
-        ) : (
-          <form className="doctor-profile__form" onSubmit={handleSave}>
-            <div className="form-grid">
-              <div className="form-group">
-                <label htmlFor="name">Nombre</label>
-                <input id="name" type="text" value={form.name} onChange={handleChange('name')} required />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="specialty">Especialidad</label>
-                <input id="specialty" type="text" value={form.specialty} onChange={handleChange('specialty')} required />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="email">Correo</label>
-                <input id="email" type="email" value={form.email} onChange={handleChange('email')} required />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="phone">Teléfono</label>
-                <input id="phone" type="tel" value={form.phone} onChange={handleChange('phone')} />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="bio">Biografía</label>
-              <textarea id="bio" rows="4" value={form.bio} onChange={handleChange('bio')} />
-            </div>
-
-            <div className="doctor-profile__form-actions">
-              <button type="button" className="btn btn--ghost" onClick={handleCancel}>Cancelar</button>
-              <button type="submit" className="btn btn--primary">Guardar cambios</button>
-            </div>
-          </form>
         )}
       </div>
     </DoctorLayout>

@@ -7,9 +7,6 @@ export default function LoginPage() {
 
   const handleLogin = (user) => {
     localStorage.setItem('mediturn_user', JSON.stringify(user));
-    if (user.isLocal) {
-      localStorage.setItem('token', `local-token-${user.role}`);
-    }
     navigate(user.dashboardPath);
   };
 
@@ -20,8 +17,7 @@ export default function LoginPage() {
           <span className="eyebrow">Acceso</span>
           <h1>Inicia sesion en MediTurn</h1>
           <p>
-            Ingresa con un usuario de prueba para entrar al panel que corresponda
-            a cada rol.
+            Ingresa con la cuenta registrada en el sistema.
           </p>
           <ul className="auth-list">
             <li>Validacion de correo y contrasena.</li>
@@ -32,7 +28,7 @@ export default function LoginPage() {
 
         <div className="auth-card">
           <h2>Iniciar sesion</h2>
-          <p className="auth-subtitle">Selecciona un usuario o ingresa sus datos.</p>
+          <p className="auth-subtitle">Tus credenciales se validan con el sistema.</p>
           <LoginForm onLogin={handleLogin} />
           <p className="auth-footer">
             No tienes cuenta? <Link to="/registro">Registrate aqui</Link>

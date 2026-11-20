@@ -167,6 +167,25 @@ class AuthApiIntegrationTest {
     }
 
     @Test
+    void returnsTheAuthenticatedUserFromTheDatabase() throws Exception {
+        String token = registerAndGetToken("ana@example.com");
+
+        mockMvc.perform(get("/api/v1/auth/me")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Ana"))
+                .andExpect(jsonPath("$.lastName").value("Pérez"))
+                .andExpect(jsonPath("$.email").value("ana@example.com"))
+                .andExpect(jsonPath("$.role").value("PATIENT"));
+    }
+
+    @Test
+    void requiresAuthenticationToReadCurrentUser() throws Exception {
+        mockMvc.perform(get("/api/v1/auth/me"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void returnsUnauthorizedForIncorrectPassword() throws Exception {
         register("ana@example.com");
 

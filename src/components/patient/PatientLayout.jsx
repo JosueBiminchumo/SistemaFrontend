@@ -1,74 +1,19 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getCurrentUser, logout } from '../../services/authService';
 import './PatientLayout.css';
 
-function getProfile() {
-  const storedUser = localStorage.getItem('mediturn_user');
-  const storedPatients = localStorage.getItem('patients');
-
-  if (!storedUser) {
-    return {
-      firstName: 'Paciente',
-      lastName: '',
-    };
-  }
-
-  const currentUser = JSON.parse(storedUser);
-  const token = localStorage.getItem('token');
-  if (currentUser.isLocal === false || (token && !token.startsWith('local-token-'))) {
-    return {
-      firstName: currentUser.firstName || currentUser.name?.split(' ')[0] || 'Paciente',
-      lastName: currentUser.lastName || currentUser.name?.split(' ').slice(1).join(' ') || '',
-    };
-  }
-
-  if (!storedPatients) {
-    return {
-      firstName: 'Paciente',
-      lastName: '',
-    };
-  }
-
-  const patients = JSON.parse(storedPatients);
-
-  return (
-    patients.find(
-      (patient) => patient.id === currentUser.id
-    ) || {
-      firstName: 'Paciente',
-      lastName: '',
-    }
-  );
-}
-
-function getNotifications() {
-  const storedUser = localStorage.getItem('mediturn_user');
-  const storedNotifications = localStorage.getItem('notifications');
-
-  if (!storedUser || !storedNotifications) {
-    return [];
-  }
-
-  const currentUser = JSON.parse(storedUser);
-  const notifications = JSON.parse(storedNotifications);
-
-  return notifications.filter(
-    (notification) => notification.patientId === currentUser.id
-  );
-}
-
 export default function PatientLayout() {
-  const profile = getProfile();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState(
-    getNotifications
-  );
+  const [profile, setProfile] = useState(null);
+  const [error, setError] = useState('');
 
-  const unreadNotifications = notifications.filter(
-    (notification) => !notification.read
-  );
+  useEffect(() => {
+    getCurrentUser()
+      .then(setProfile)
+      .catch((requestError) => setError(requestError.message));
+  }, []);
 
   const isActive = (path) => location.pathname === path;
 
@@ -76,23 +21,13 @@ export default function PatientLayout() {
     setSidebarOpen(false);
   };
 
-  const handleNotificationClick = (notificationId) => {
-    const updatedNotifications = notifications.map(
-      (notification) =>
-        notification.id === notificationId
-          ? { ...notification, read: true }
-          : notification
-    );
-
-    setNotifications(updatedNotifications);
-
-    localStorage.setItem(
-      'notifications',
-      JSON.stringify(updatedNotifications)
-    );
+  const handleLogout = () => {
+    logout();
   };
 
-  const initials = `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`;
+  const firstName = profile?.firstName ?? '';
+  const lastName = profile?.lastName ?? '';
+  const initials = `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
 
   return (
     <div className="patient-layout">
@@ -146,7 +81,7 @@ export default function PatientLayout() {
 
           <div>
             <strong>
-              {profile.firstName} {profile.lastName}
+              {profile ? `${firstName} ${lastName}` : 'Cargando cuenta...'}
             </strong>
             <span>Paciente</span>
           </div>
@@ -212,7 +147,10 @@ export default function PatientLayout() {
         <div className="sidebar-footer">
           <Link
             to="/login"
-            onClick={closeSidebar}
+            onClick={() => {
+              closeSidebar();
+              handleLogout();
+            }}
             className="sidebar-logout"
           >
             <span>🚪</span>
@@ -222,6 +160,7 @@ export default function PatientLayout() {
       </aside>
 
       <div className="patient-main-content">
+        {error && <p role="alert">{error}</p>}
         <header className="patient-topbar">
           <div className="patient-search">
             <svg
@@ -243,80 +182,13 @@ export default function PatientLayout() {
           </div>
 
           <div className="patient-topbar-right">
-            <button
-              type="button"
-              className="notification-button"
-              onClick={() =>
-                setNotificationsOpen((isOpen) => !isOpen)
-              }
-              aria-label="Notificaciones"
-            >
-              <svg
-                width="19"
-                height="19"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-
-              {unreadNotifications.length > 0 && (
-                <span className="notification-dot" />
-              )}
-            </button>
-
             <div className="topbar-user">
               <div className="topbar-avatar">
                 {initials}
               </div>
 
-              <span>{profile.firstName}</span>
+              <span>{firstName || 'Cargando...'}</span>
             </div>
-
-            {notificationsOpen && (
-              <div className="notifications-dropdown">
-                <h3>Notificaciones</h3>
-
-                {notifications.length > 0 ? (
-                  notifications.map((notification) => (
-                    <button
-                      type="button"
-                      className={`notification-item ${
-                        !notification.read ? 'unread' : ''
-                      }`}
-                      key={notification.id}
-                      onClick={() =>
-                        handleNotificationClick(
-                          notification.id
-                        )
-                      }
-                    >
-                      <div className="notification-content">
-                        <p>{notification.message}</p>
-
-                        <span>
-                          {notification.date} ·{' '}
-                          {notification.time}
-                        </span>
-                      </div>
-
-                      {!notification.read && (
-                        <span className="notification-unread-dot" />
-                      )}
-                    </button>
-                  ))
-                ) : (
-                  <div className="notification-item">
-                    <p>No tienes notificaciones.</p>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </header>
 

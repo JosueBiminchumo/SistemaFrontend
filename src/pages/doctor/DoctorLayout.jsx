@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getProfile } from './doctorStorage';
+import { getCurrentUser, logout } from '../../services/authService';
 import './DoctorLayout.css';
 
 const navItems = [
@@ -15,20 +15,24 @@ export default function DoctorLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const profile = getProfile();
+  const [profile, setProfile] = useState(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    getCurrentUser()
+      .then(setProfile)
+      .catch((requestError) => setError(requestError.message));
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    logout();
     navigate('/login');
   };
 
-  const initials = profile.name
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase();
+  const fullName = profile ? `${profile.firstName} ${profile.lastName}` : 'Cargando cuenta...';
+  const initials = profile
+    ? `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase()
+    : '...';
 
   return (
     <div className="doctor-layout">
@@ -64,7 +68,7 @@ export default function DoctorLayout({ children }) {
             <span className="doctor-layout__avatar">{initials}</span>
             {!collapsed && (
               <div className="doctor-layout__user-info">
-                <span className="doctor-layout__user-name">{profile.name}</span>
+                <span className="doctor-layout__user-name">{fullName}</span>
                 <span className="doctor-layout__user-role">Médico</span>
               </div>
             )}
@@ -77,7 +81,10 @@ export default function DoctorLayout({ children }) {
         </div>
       </aside>
 
-      <main className="doctor-layout__content">{children}</main>
+      <main className="doctor-layout__content">
+        {error && <p role="alert">{error}</p>}
+        {children}
+      </main>
     </div>
   );
 }

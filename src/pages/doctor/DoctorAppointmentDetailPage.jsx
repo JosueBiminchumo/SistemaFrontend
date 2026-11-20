@@ -1,95 +1,107 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getAppointments, saveAppointments } from './doctorStorage';
+import { getAppointment, updateAppointmentStatus } from '../../services/appointmentService';
 import DoctorLayout from './DoctorLayout';
 import './DoctorAppointmentDetailPage.css';
 
 const nextStatusOptions = {
-  PENDIENTE: ['CONFIRMADA', 'CANCELADA'],
-  CONFIRMADA: ['COMPLETADA', 'CANCELADA'],
-  COMPLETADA: [],
-  CANCELADA: [],
+  PENDING: ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED: ['COMPLETED', 'CANCELLED'],
+  COMPLETED: [],
+  CANCELLED: [],
+};
+
+const statusLabels = {
+  PENDING: 'PENDIENTE',
+  CONFIRMED: 'CONFIRMADA',
+  COMPLETED: 'COMPLETADA',
+  CANCELLED: 'CANCELADA',
 };
 
 export default function DoctorAppointmentDetailPage() {
   const { id } = useParams();
-  const [appointments, setAppointments] = useState(() => getAppointments());
+  const [appointment, setAppointment] = useState(null);
   const [feedback, setFeedback] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const original = useMemo(
-    () => appointments.find((appt) => appt.id === Number(id)),
-    [appointments, id]
-  );
+  useEffect(() => {
+    getAppointment(id)
+      .then(setAppointment)
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  if (!original) {
-    return (
-      <DoctorLayout>
-        <div className="doctor-appointment-detail">
-          <p className="doctor-appointment-detail__empty">Cita no encontrada.</p>
-          <Link to="/medico/citas">← Volver a mis citas</Link>
-        </div>
-      </DoctorLayout>
-    );
-  }
-
-  const handleStatusChange = (newStatus) => {
-    const updated = appointments.map((appt) =>
-      appt.id === original.id ? { ...appt, status: newStatus } : appt
-    );
-    setAppointments(updated);
-    saveAppointments(updated);
-    setFeedback(`Estado actualizado a ${newStatus}.`);
-    setTimeout(() => setFeedback(''), 2500);
+  const handleStatusChange = async (newStatus) => {
+    setError('');
+    try {
+      const updated = await updateAppointmentStatus(appointment.id, newStatus);
+      setAppointment(updated);
+      setFeedback(`Estado actualizado a ${statusLabels[updated.status] ?? updated.status}.`);
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   };
 
   return (
     <DoctorLayout>
       <div className="doctor-appointment-detail">
-        <Link to="/medico/citas" className="doctor-appointment-detail__back">← Volver a mis citas</Link>
+        <Link to="/medico/citas" className="doctor-appointment-detail__back">
+          ← Volver a mis citas
+        </Link>
 
-        <header className="doctor-appointment-detail__header">
-          <h1>Cita con {original.patientName}</h1>
-          <span className={`appointment-status appointment-status--${original.status.toLowerCase()}`}>
-            {original.status}
-          </span>
-        </header>
+        {loading && <p role="status">Cargando cita...</p>}
+        {error && <p role="alert">{error}</p>}
 
-        {feedback && <div className="doctor-appointment-detail__feedback">{feedback}</div>}
+        {!loading && !appointment ? (
+          <p className="doctor-appointment-detail__empty">No se encontró la cita.</p>
+        ) : appointment ? (
+          <>
+            <header className="doctor-appointment-detail__header">
+              <h1>Cita con {appointment.patientName}</h1>
+              <span className={`appointment-status appointment-status--${appointment.status.toLowerCase()}`}>
+                {statusLabels[appointment.status] ?? appointment.status}
+              </span>
+            </header>
 
-        <div className="doctor-appointment-detail__card">
-          <div className="detail-row">
-            <span className="detail-row__label">Paciente</span>
-            <span className="detail-row__value">{original.patientName}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-row__label">Fecha</span>
-            <span className="detail-row__value">{original.date}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-row__label">Hora</span>
-            <span className="detail-row__value">{original.time}</span>
-          </div>
-          <div className="detail-row">
-            <span className="detail-row__label">Motivo</span>
-            <span className="detail-row__value">{original.reason}</span>
-          </div>
-        </div>
+            {feedback && <div className="doctor-appointment-detail__feedback">{feedback}</div>}
 
-        {nextStatusOptions[original.status]?.length > 0 && (
-          <div className="doctor-appointment-detail__actions">
-            <span className="doctor-appointment-detail__actions-label">Actualizar estado:</span>
-            {nextStatusOptions[original.status].map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={`btn-status btn-status--${option.toLowerCase()}`}
-                onClick={() => handleStatusChange(option)}
-              >
-                Marcar como {option}
-              </button>
-            ))}
-          </div>
-        )}
+            <div className="doctor-appointment-detail__card">
+              <div className="detail-row">
+                <span className="detail-row__label">Paciente</span>
+                <span className="detail-row__value">{appointment.patientName}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-row__label">Fecha</span>
+                <span className="detail-row__value">{appointment.startAt.slice(0, 10)}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-row__label">Hora</span>
+                <span className="detail-row__value">{appointment.startAt.slice(11, 16)}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-row__label">Motivo</span>
+                <span className="detail-row__value">{appointment.reason}</span>
+              </div>
+            </div>
+
+            {nextStatusOptions[appointment.status]?.length > 0 && (
+              <div className="doctor-appointment-detail__actions">
+                <span className="doctor-appointment-detail__actions-label">Actualizar estado:</span>
+                {nextStatusOptions[appointment.status].map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`btn-status btn-status--${option.toLowerCase()}`}
+                    onClick={() => handleStatusChange(option)}
+                  >
+                    Marcar como {statusLabels[option]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        ) : null}
       </div>
     </DoctorLayout>
   );

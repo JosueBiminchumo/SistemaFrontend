@@ -1,78 +1,71 @@
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import {
+  getAppointment,
+  rescheduleAppointment,
+} from '../../services/appointmentService';
+import { getDoctorSchedule } from '../../services/doctorService';
 import './RescheduleAppointmentPage.css';
+
+function localDateString(date) {
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 10);
+}
 
 export default function RescheduleAppointmentPage() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [appointment, setAppointment] = useState(null);
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [reason, setReason] = useState('');
+  const [availableTimes, setAvailableTimes] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const appointments = JSON.parse(
-    localStorage.getItem('appointments') || '[]'
-  );
+  useEffect(() => {
+    getAppointment(id)
+      .then((item) => {
+        setAppointment(item);
+        setReason(item.reason);
+      })
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  const currentUser = JSON.parse(
-    localStorage.getItem('mediturn_user')
-  );
+  useEffect(() => {
+    if (!appointment || !date) return undefined;
 
-  const appointment = appointments.find(
-    (item) =>
-      String(item.id) === id &&
-      item.patientId === currentUser.id
-  );
+    let active = true;
+    getDoctorSchedule(appointment.doctorId, date)
+      .then((schedules) => {
+        if (active) {
+          setAvailableTimes([...new Set(
+            schedules.flatMap((schedule) => schedule.availableSlots.map((slot) => slot.slice(0, 5)))
+          )].sort());
+        }
+      })
+      .catch((requestError) => {
+        if (active) setError(requestError.message);
+      });
 
-  if (!appointment) {
-    return (
-      <main className="reschedule-appointment-page">
-        <section className="reschedule-appointment-container">
-          <button
-            type="button"
-            className="back-reschedule-button"
-            onClick={() => navigate(-1)}
-          >
-            ← Volver
-          </button>
+    return () => {
+      active = false;
+    };
+  }, [appointment, date]);
 
-          <div className="reschedule-appointment-header">
-            <h1>Cita no encontrada</h1>
-            <p>No se encontró la cita que deseas reprogramar.</p>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!appointment || !availableTimes.includes(time)) {
+      setError('Selecciona un horario disponible para esa fecha.');
+      return;
+    }
 
-    const formData = new FormData(event.target);
-
-    const newDate = formData.get('new-date');
-    const newTime = formData.get('new-time');
-    const reason = formData.get('reason');
-
-    const appointmentExists = appointments.some(
-    (currentAppointment) =>
-      currentAppointment.id !== appointment.id &&
-      currentAppointment.doctor === appointment.doctor &&
-      currentAppointment.date === newDate &&
-      currentAppointment.time === newTime &&
-      currentAppointment.status !== 'cancelled'
-  );
-
-  if (appointmentExists) {
-    Swal.fire({
-      title: 'Horario no disponible',
-      text: 'El médico ya tiene una cita registrada en ese horario. Selecciona otra fecha u horario.',
-      icon: 'warning',
-      confirmButtonText: 'Aceptar',
-      confirmButtonColor: '#2563eb',
-    });
-
-    return;
-  }
-    Swal.fire({
+    const confirmation = await Swal.fire({
       title: '¿Guardar cambios?',
-      text: 'La fecha y horario de tu cita serán actualizados.',
+      text: 'La fecha y el horario serán actualizados en tu cuenta.',
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Guardar cambios',
@@ -80,156 +73,120 @@ export default function RescheduleAppointmentPage() {
       reverseButtons: true,
       confirmButtonColor: '#2563eb',
       cancelButtonColor: '#e2e8f0',
-      customClass: {
-        cancelButton: 'swal-cancel-button',
-      },
-    }).then((result) => {
-      if (!result.isConfirmed) {
-        return;
-      }
+      customClass: { cancelButton: 'swal-cancel-button' },
+    });
+    if (!confirmation.isConfirmed) return;
 
-      const updatedAppointments = appointments.map(
-        (currentAppointment) =>
-          currentAppointment.id === appointment.id
-            ? {
-                ...currentAppointment,
-                date: newDate,
-                time: newTime,
-                reason: reason || currentAppointment.reason,
-                status: 'pending',
-              }
-            : currentAppointment
-      );
-
-      localStorage.setItem(
-        'appointments',
-        JSON.stringify(updatedAppointments)
-      );
-
-      const storedNotifications = JSON.parse(
-        localStorage.getItem('notifications') || '[]'
-      );
-
-      const newNotification = {
-        id: `appointment-rescheduled-${appointment.id}-${Date.now()}`,
-        appointmentId: appointment.id,
-        patientId: currentUser.id,
-        message: `Tu cita con ${appointment.doctor} fue reprogramada para el ${newDate} a las ${newTime}.`,
-        date: newDate,
-        time: newTime,
-        read: false,
-      };
-
-      localStorage.setItem(
-        'notifications',
-        JSON.stringify([
-          newNotification,
-          ...storedNotifications,
-        ])
-      );
-
-      Swal.fire({
+    setSaving(true);
+    setError('');
+    try {
+      await rescheduleAppointment(appointment.id, {
+        doctorId: appointment.doctorId,
+        startAt: `${date}T${time}:00`,
+        reason: reason.trim(),
+      });
+      await Swal.fire({
         title: 'Cita reprogramada',
         text: 'Los cambios se guardaron correctamente.',
         icon: 'success',
         confirmButtonText: 'Ver cita',
         confirmButtonColor: '#2563eb',
-      }).then(() => {
-        navigate(`/paciente/cita/${appointment.id}`);
       });
-    });
+      navigate(`/paciente/cita/${appointment.id}`);
+    } catch (requestError) {
+      setError(requestError.message);
+      await Swal.fire({
+        title: 'No se pudo reprogramar',
+        text: requestError.message,
+        icon: 'error',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2563eb',
+      });
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return <main className="reschedule-appointment-page"><p role="status">Cargando cita...</p></main>;
+  }
+
+  if (!appointment) {
+    return (
+      <main className="reschedule-appointment-page">
+        <section className="reschedule-appointment-container">
+          <h1>Cita no encontrada</h1>
+          <p role="alert">{error || 'No se encontró la cita que deseas reprogramar.'}</p>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="reschedule-appointment-page">
       <section className="reschedule-appointment-container">
-        <button
-          type="button"
-          className="back-reschedule-button"
-          onClick={() => navigate(-1)}
-        >
+        <button type="button" className="back-reschedule-button" onClick={() => navigate(-1)}>
           ← Volver
         </button>
-
         <div className="reschedule-appointment-header">
           <h1>Reprogramar cita</h1>
-          <p>Selecciona una nueva fecha y horario para tu cita.</p>
+          <p>Selecciona una nueva fecha y un horario disponible.</p>
         </div>
+        {error && <p role="alert">{error}</p>}
 
         <section className="current-appointment">
           <div className="current-appointment-title">
             <h2>Cita actual</h2>
-            <span>
-              Información de la cita que deseas reprogramar.
-            </span>
+            <span>Información registrada en el sistema.</span>
           </div>
-
           <div className="current-appointment-info">
-            <div>
-              <span>Médico</span>
-              <strong>{appointment.doctor}</strong>
-            </div>
-
-            <div>
-              <span>Especialidad</span>
-              <strong>{appointment.specialty}</strong>
-            </div>
-
+            <div><span>Médico</span><strong>{appointment.doctorName}</strong></div>
+            <div><span>Especialidad</span><strong>{appointment.specialty}</strong></div>
             <div>
               <span>Fecha y hora</span>
-              <strong>
-                {appointment.date} - {appointment.time}
-              </strong>
+              <strong>{appointment.startAt.slice(0, 10)} - {appointment.startAt.slice(11, 16)}</strong>
             </div>
           </div>
         </section>
 
-        <form
-          className="reschedule-form"
-          onSubmit={handleSubmit}
-        >
+        <form className="reschedule-form" onSubmit={handleSubmit}>
           <div className="form-section">
             <div className="form-section-title">
               <h2>Nueva fecha y horario</h2>
-              <p>
-                Selecciona cuándo deseas realizar tu cita.
-              </p>
+              <p>Los horarios se consultan al servidor según la agenda del médico.</p>
             </div>
-
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="new-date">Nueva fecha</label>
                 <input
                   id="new-date"
-                  name="new-date"
                   type="date"
+                  value={date}
+                  min={localDateString(new Date())}
+                  onChange={(event) => {
+                    setDate(event.target.value);
+                    setTime('');
+                    setAvailableTimes([]);
+                    setError('');
+                  }}
                   required
                 />
               </div>
-
               <div className="form-group">
                 <label htmlFor="new-time">Horario disponible</label>
-
-                <select id="new-time" name="new-time" required>
+                <select
+                  id="new-time"
+                  value={time}
+                  onChange={(event) => setTime(event.target.value)}
+                  disabled={!date || availableTimes.length === 0}
+                  required
+                >
                   <option value="">Selecciona un horario</option>
-                  <option value="08:00">08:00</option>
-                  <option value="08:30">08:30</option>
-                  <option value="09:00">09:00</option>
-                  <option value="09:30">09:30</option>
-                  <option value="10:00">10:00</option>
-                  <option value="10:30">10:30</option>
-                  <option value="11:00">11:00</option>
-                  <option value="11:30">11:30</option>
-                  <option value="12:00">12:00</option>
-                  <option value="12:30">12:30</option>
-                  <option value="13:00">13:00</option>
-                  <option value="13:30">13:30</option>
-                  <option value="14:00">14:00</option>
-                  <option value="14:30">14:30</option>
-                  <option value="15:00">15:00</option>
-                  <option value="15:30">15:30</option>
-                  <option value="16:00">16:00</option>    
+                  {availableTimes.map((slot) => <option key={slot} value={slot}>{slot}</option>)}
                 </select>
+                {date && availableTimes.length === 0 && (
+                  <small>No hay horarios disponibles para esta fecha.</small>
+                )}
               </div>
             </div>
           </div>
@@ -237,20 +194,16 @@ export default function RescheduleAppointmentPage() {
           <div className="form-section">
             <div className="form-section-title">
               <h2>Motivo</h2>
-              <p>
-                Puedes indicar por qué deseas reprogramar tu cita.
-              </p>
+              <p>Actualiza el motivo de la cita si es necesario.</p>
             </div>
-
             <div className="form-group">
-              <label htmlFor="reason">Motivo de la reprogramación</label>
-
+              <label htmlFor="reason">Motivo de la cita</label>
               <textarea
                 id="reason"
-                name="reason"
                 rows="4"
-                defaultValue={appointment.reason || ''}
-                placeholder="Indica el motivo de la reprogramación"
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
+                required
               />
             </div>
           </div>
@@ -259,9 +212,8 @@ export default function RescheduleAppointmentPage() {
             <button type="button" className="cancel-button" onClick={() => navigate(-1)}>
               Cancelar
             </button>
-
-            <button type="submit" className="save-button">
-              Guardar cambios
+            <button type="submit" className="save-button" disabled={saving}>
+              {saving ? 'Guardando...' : 'Guardar cambios'}
             </button>
           </div>
         </form>

@@ -14,6 +14,7 @@ import com.mediturno.backend.appointment.domain.Appointment;
 import com.mediturno.backend.appointment.domain.AppointmentStatus;
 import com.mediturno.backend.appointment.dto.AppointmentRequest;
 import com.mediturno.backend.appointment.dto.AppointmentResponse;
+import com.mediturno.backend.appointment.dto.AppointmentStatusRequest;
 import com.mediturno.backend.appointment.repository.AppointmentRepository;
 import com.mediturno.backend.common.exception.ResourceConflictException;
 import com.mediturno.backend.common.exception.ResourceNotFoundException;
@@ -96,6 +97,36 @@ public class AppointmentService {
         Appointment appointment = authorizedAppointment(id, email, role);
         ensureReschedulable(appointment);
         appointment.cancel();
+        return AppointmentResponse.from(appointmentRepository.saveAndFlush(appointment));
+    }
+
+    @Transactional
+    public AppointmentResponse updateStatus(
+            Long id, AppointmentStatusRequest request, String email, UserRole role) {
+        if (role == UserRole.PATIENT) {
+            throw new AccessDeniedException("Solo el médico asignado o un administrador puede actualizar el estado.");
+        }
+
+        Appointment appointment = authorizedAppointment(id, email, role);
+        switch (request.status()) {
+            case CONFIRMED -> {
+                if (appointment.getStatus() != AppointmentStatus.PENDING) {
+                    throw new ResourceConflictException("Solo se pueden confirmar citas pendientes.");
+                }
+                appointment.confirm();
+            }
+            case COMPLETED -> {
+                if (appointment.getStatus() != AppointmentStatus.CONFIRMED) {
+                    throw new ResourceConflictException("Solo se pueden completar citas confirmadas.");
+                }
+                appointment.complete();
+            }
+            case CANCELLED -> {
+                ensureReschedulable(appointment);
+                appointment.cancel();
+            }
+            case PENDING -> throw new ResourceConflictException("No se puede volver una cita al estado pendiente.");
+        }
         return AppointmentResponse.from(appointmentRepository.saveAndFlush(appointment));
     }
 

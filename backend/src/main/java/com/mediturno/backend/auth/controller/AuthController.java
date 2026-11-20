@@ -3,10 +3,14 @@ package com.mediturno.backend.auth.controller;
 import com.mediturno.backend.auth.dto.AuthResponse;
 import com.mediturno.backend.auth.dto.LoginRequest;
 import com.mediturno.backend.auth.dto.RegisterRequest;
+import com.mediturno.backend.auth.dto.UserSummary;
 import com.mediturno.backend.auth.service.AuthService;
+import com.mediturno.backend.user.domain.User;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,5 +34,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @GetMapping("/me")
+    public UserSummary currentUser(@AuthenticationPrincipal User user) {
+        return UserSummary.from(user);
     }
 }

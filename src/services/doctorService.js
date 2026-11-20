@@ -18,3 +18,8 @@ export const getDoctorSchedule = async (id, date) => {
 export const replaceMySchedule = async (schedule) => {
   await api.put('/doctors/me/schedule', schedule);
 };
+
+export const getMySchedule = async () => {
+  const { data } = await api.get('/doctors/me/schedule');
+  return data;
+};

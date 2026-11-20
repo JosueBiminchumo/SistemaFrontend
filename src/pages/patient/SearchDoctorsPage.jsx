@@ -1,41 +1,51 @@
-import React, { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DoctorFilters from '../../components/doctors/DoctorFilters';
 import DoctorCard from '../../components/doctors/DoctorCard';
-import { doctorsMock } from './doctorsMock';
+import { listDoctors } from '../../services/doctorService';
+import { listSpecialties } from '../../services/specialtyService';
 
 const SearchDoctorsPage = () => {
   const [filters, setFilters] = useState({
     name: '',
     specialty: '',
-    availability: false,
   });
+  const [doctors, setDoctors] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  // Extraer las especialidades únicas para el menú desplegable
-  const specialties = [...new Set(doctorsMock.map(doc => doc.specialty))];
+  useEffect(() => {
+    Promise.all([listDoctors(), listSpecialties()])
+      .then(([doctorItems, specialtyItems]) => {
+        setDoctors(doctorItems.filter((doctor) => doctor.active));
+        setSpecialties(specialtyItems.filter((specialty) => specialty.active));
+      })
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, []);
 
-  // Lógica para filtrar la lista de médicos
-  const filteredDoctors = doctorsMock.filter(doctor => {
-    const matchName = doctor.name.toLowerCase().includes(filters.name.toLowerCase());
-    const matchSpecialty = filters.specialty === '' || doctor.specialty === filters.specialty;
-    const matchAvailability = !filters.availability || doctor.availability === true;
-    
-    return matchName && matchSpecialty && matchAvailability;
-  });
+  const filteredDoctors = useMemo(() => doctors.filter((doctor) => {
+    const name = `${doctor.firstName} ${doctor.lastName}`.toLowerCase();
+    const matchName = name.includes(filters.name.trim().toLowerCase());
+    const matchSpecialty = !filters.specialty || doctor.specialty === filters.specialty;
+    return matchName && matchSpecialty;
+  }), [doctors, filters]);
 
   return (
     <div className="container py-4">
       <h2 className="mb-4">Buscar Médicos</h2>
+      {error && <p role="alert">{error}</p>}
       
-      {/* Componente de Filtros */}
       <DoctorFilters 
         filters={filters} 
         setFilters={setFilters} 
-        specialties={specialties} 
+        specialties={specialties.map((specialty) => specialty.name)}
       />
       
-      {/* Grilla de Tarjetas de Médicos */}
       <div className="row g-4 mt-2">
-        {filteredDoctors.length > 0 ? (
+        {loading ? (
+          <div className="col-12"><p role="status">Cargando médicos...</p></div>
+        ) : filteredDoctors.length > 0 ? (
           filteredDoctors.map(doctor => (
             <div className="col-12 col-md-6 col-lg-4" key={doctor.id}>
               <DoctorCard doctor={doctor} />

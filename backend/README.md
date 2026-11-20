@@ -38,16 +38,18 @@ mvn test
 
 - `POST /api/v1/auth/register`: crea una cuenta `PATIENT` si el registro está habilitado.
 - `POST /api/v1/auth/login`: valida credenciales y devuelve un JWT.
+- `GET /api/v1/auth/me`: devuelve los datos de la cuenta autenticada.
 - `GET /api/v1/patients/me`: devuelve el perfil del paciente autenticado.
 - `PUT /api/v1/patients/me`: actualiza DNI, fecha de nacimiento y teléfono.
 - `GET /api/v1/specialties`: devuelve el catálogo activo; `POST`, `PUT /{id}` y `DELETE /{id}` son exclusivos de ADMIN. El borrado es lógico.
 - `GET /api/v1/doctors`, `GET /api/v1/doctors/{id}` y `GET /api/v1/doctors/{id}/schedule?date=YYYY-MM-DD`: catálogo, detalle y horarios disponibles.
-- `PUT /api/v1/doctors/me/schedule`: reemplaza los horarios recurrentes del médico autenticado.
+- `GET /api/v1/doctors/me/schedule` y `PUT /api/v1/doctors/me/schedule`: consulta y reemplaza los horarios recurrentes del médico autenticado.
 - `POST /api/v1/appointments`, `GET /api/v1/appointments`, `GET /{id}`, `PUT /{id}` y `PATCH /{id}/cancel`: reserva y gestión de citas con alcance según rol.
+- `PATCH /api/v1/appointments/{id}/status`: transición de estado exclusiva del médico asignado o ADMIN (`PENDING` → `CONFIRMED` → `COMPLETED`, o cancelación).
 - `GET /api/v1/statistics/dashboard?from=YYYY-MM-DD&to=YYYY-MM-DD` y `GET /api/v1/statistics/appointments?groupBy=day|status|specialty&from=...&to=...`: indicadores exclusivos de ADMIN.
-- Las rutas `/api/v1/admin/**`, `/api/v1/doctors/**` y `/api/v1/patients/**`
-  requieren respectivamente `ADMIN`, `DOCTOR` o `PATIENT` (también se permite
-  `ADMIN` en las rutas de los otros roles).
+- El catálogo de médicos y especialidades es público. Los endpoints de gestión
+  de agenda requieren `DOCTOR` (o `ADMIN`); el perfil de paciente requiere
+  `PATIENT` (o `ADMIN`), y las estadísticas requieren `ADMIN`.
 - Las contraseñas se almacenan con BCrypt. El hash nunca forma parte de las respuestas.
 
 El registro se puede deshabilitar en despliegues existentes con

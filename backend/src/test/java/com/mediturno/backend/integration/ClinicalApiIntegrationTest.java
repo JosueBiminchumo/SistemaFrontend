@@ -180,6 +180,52 @@ class ClinicalApiIntegrationTest {
     }
 
     @Test
+    void doctorCanPersistAppointmentStatusTransitions() throws Exception {
+        String request = objectMapper.writeValueAsString(new AppointmentPayload(
+                doctorId, appointmentDate.atTime(9, 0), "Consulta de control"));
+        var created = mockMvc.perform(post("/api/v1/appointments")
+                        .header("Authorization", bearer(patientToken))
+                        .contentType("application/json")
+                        .content(request))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long appointmentId = objectMapper.readTree(created.getResponse().getContentAsString())
+                .get("id").asLong();
+
+        mockMvc.perform(patch("/api/v1/appointments/{id}/status", appointmentId)
+                        .header("Authorization", bearer(doctorToken))
+                        .contentType("application/json")
+                        .content("{\"status\":\"CONFIRMED\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("CONFIRMED"));
+
+        mockMvc.perform(patch("/api/v1/appointments/{id}/status", appointmentId)
+                        .header("Authorization", bearer(doctorToken))
+                        .contentType("application/json")
+                        .content("{\"status\":\"COMPLETED\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
+
+        mockMvc.perform(patch("/api/v1/appointments/{id}/status", appointmentId)
+                        .header("Authorization", bearer(doctorToken))
+                        .contentType("application/json")
+                        .content("{\"status\":\"CONFIRMED\"}"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void doctorScheduleManagementRequiresAuthenticationAndReadsPersistedSchedule() throws Exception {
+        mockMvc.perform(get("/api/v1/doctors/me/schedule"))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(get("/api/v1/doctors/me/schedule")
+                        .header("Authorization", bearer(doctorToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].dayOfWeek").value(appointmentDate.getDayOfWeek().name()))
+                .andExpect(jsonPath("$[0].startTime").value("09:00:00"));
+    }
+
+    @Test
     void specialtiesCanBeCreatedAndDeactivatedByAdmin() throws Exception {
         mockMvc.perform(post("/api/v1/specialties")
                         .header("Authorization", bearer(adminToken))

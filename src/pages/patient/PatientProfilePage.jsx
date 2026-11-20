@@ -4,77 +4,22 @@ import Swal from 'sweetalert2';
 import { getPatientProfile, updatePatientProfile } from '../../services/patientService';
 import './PatientProfilePage.css';
 
-function getLocalProfile() {
-  const storedUser = localStorage.getItem('mediturn_user');
-  const storedPatients = localStorage.getItem('patients');
-
-  if (!storedUser || !storedPatients) {
-    return null;
-  }
-
-  const currentUser = JSON.parse(storedUser);
-  const patients = JSON.parse(storedPatients);
-
-  const profile = patients.find(
-    (patient) => patient.id === currentUser.id
-  );
-  return profile
-    ? { ...profile, documentNumber: profile.documentNumber || profile.document || '' }
-    : null;
-}
-
-function hasApiSession() {
-  const token = localStorage.getItem('token');
-  return Boolean(token && !token.startsWith('local-token-'));
-}
-
-function cacheProfile(profile, saveLocalProfile = true) {
-  const cachedProfile = {
-    ...profile,
-    document: profile.documentNumber,
-  };
-  if (saveLocalProfile) {
-    const patients = JSON.parse(localStorage.getItem('patients') || '[]');
-    localStorage.setItem(
-      'patients',
-      JSON.stringify([
-        ...patients.filter((patient) => patient.id !== cachedProfile.id),
-        cachedProfile,
-      ])
-    );
-    localStorage.setItem('mediturn_registered_patient', JSON.stringify(cachedProfile));
-  }
-  return cachedProfile;
-}
-
 export default function PatientProfilePage() {
   const navigate = useNavigate();
-  const [isRemoteProfile] = useState(hasApiSession);
-  const [profile, setProfile] = useState(() =>
-    isRemoteProfile ? null : getLocalProfile()
-  );
-  const [savedProfile, setSavedProfile] = useState(() =>
-    isRemoteProfile ? null : getLocalProfile()
-  );
-  const [isLoading, setIsLoading] = useState(isRemoteProfile);
+  const [profile, setProfile] = useState(null);
+  const [savedProfile, setSavedProfile] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
-    if (!isRemoteProfile) {
-      return;
-    }
-
     let isMounted = true;
     getPatientProfile()
       .then((response) => {
         if (!isMounted) {
           return;
         }
-        const loadedProfile = cacheProfile(response, false);
-        setProfile(loadedProfile);
-        setSavedProfile(loadedProfile);
+        setProfile(response);
+        setSavedProfile(response);
       })
       .catch((error) => {
         if (isMounted) {
@@ -90,7 +35,7 @@ export default function PatientProfilePage() {
     return () => {
       isMounted = false;
     };
-  }, [isRemoteProfile]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -107,7 +52,7 @@ export default function PatientProfilePage() {
       <main className="patient-profile-page">
         <section className="patient-profile-container">
           <h1>Perfil no encontrado</h1>
-          <p>{loadError || 'No se encontró la información del paciente actual.'}</p>
+          <p role="alert">{loadError || 'No se encontró la información del paciente actual.'}</p>
         </section>
       </main>
     );
@@ -128,57 +73,15 @@ export default function PatientProfilePage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!isRemoteProfile && (currentPassword || newPassword)) {
-      if (!currentPassword || !newPassword) {
-        Swal.fire({
-          title: 'Completa los campos',
-          text: 'Ingresa tu contraseña actual y la nueva contraseña.',
-          icon: 'warning',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2563eb',
-        });
-        return;
-      }
-
-      if (currentPassword !== profile.password) {
-        Swal.fire({
-          title: 'Contraseña incorrecta',
-          text: 'La contraseña actual no coincide.',
-          icon: 'error',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2563eb',
-        });
-        return;
-      }
-
-      if (newPassword.length < 8) {
-        Swal.fire({
-          title: 'Contraseña inválida',
-          text: 'La nueva contraseña debe tener al menos 8 caracteres.',
-          icon: 'warning',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2563eb',
-        });
-        return;
-      }
-    }
-
     try {
-      const profileToSave = isRemoteProfile
-        ? cacheProfile(await updatePatientProfile({
-            documentNumber: profile.documentNumber.trim(),
-            birthDate: profile.birthDate,
-            phone: profile.phone.trim(),
-          }), false)
-        : cacheProfile({
-            ...profile,
-            ...(newPassword ? { password: newPassword } : {}),
-          });
+      const profileToSave = await updatePatientProfile({
+        documentNumber: profile.documentNumber.trim(),
+        birthDate: profile.birthDate,
+        phone: profile.phone.trim(),
+      });
 
       setProfile(profileToSave);
       setSavedProfile(profileToSave);
-      setCurrentPassword('');
-      setNewPassword('');
 
       await Swal.fire({
         title: 'Perfil actualizado',
@@ -199,13 +102,7 @@ export default function PatientProfilePage() {
   };
 
   const handleCancel = () => {
-    if (isRemoteProfile) {
-      setProfile(savedProfile);
-    } else {
-      setProfile(getLocalProfile());
-    }
-    setCurrentPassword('');
-    setNewPassword('');
+    setProfile(savedProfile);
   };
 
   return (
@@ -238,12 +135,6 @@ export default function PatientProfilePage() {
               Paciente
             </p>
 
-            <button
-              type="button"
-              className="change-photo"
-            >
-              Cambiar foto
-            </button>
           </div>
 
           <form
@@ -331,46 +222,10 @@ export default function PatientProfilePage() {
                   value={profile.email || ''}
                   onChange={handleChange}
                   required
-                  readOnly={isRemoteProfile}
+                  readOnly
                 />
               </div>
             </div>
-
-            {!isRemoteProfile && (
-              <>
-                <hr className="profile-divider" />
-
-                <h2>Cambiar contraseña</h2>
-
-                <div className="profile-form-row">
-                  <div className="profile-field">
-                    <label htmlFor="current-password">
-                      Contraseña actual
-                    </label>
-
-                    <input
-                      id="current-password"
-                      type="password"
-                      value={currentPassword}
-                      onChange={(event) => setCurrentPassword(event.target.value)}
-                    />
-                  </div>
-
-                  <div className="profile-field">
-                    <label htmlFor="new-password">
-                      Nueva contraseña
-                    </label>
-
-                    <input
-                      id="new-password"
-                      type="password"
-                      value={newPassword}
-                      onChange={(event) => setNewPassword(event.target.value)}
-                    />
-                  </div>
-                </div>
-              </>
-            )}
 
             <div className="profile-actions">
               <button

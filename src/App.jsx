@@ -11,9 +11,6 @@ import AdminLayout from './components/admin/AdminLayout';
 import PatientLayout from './components/patient/PatientLayout';
 import ProtectedRoute from './routes/ProtectedRoute';
 
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AppointmentsManagementPage from './pages/admin/AppointmentsManagementPage';
 import AdminProfilePage from './pages/admin/AdminProfilePage';
@@ -24,7 +21,6 @@ import AppointmentDetailPage from './pages/patient/AppointmentDetailPage';
 import BookAppointmentPage from './pages/patient/BookAppointmentPage';
 import MyAppointmentsPage from './pages/patient/MyAppointmentsPage';
 import PatientDashboard from './pages/patient/PatientDashboard';
-import PatientDashboardPage from './pages/patient/PatientDashboardPage';
 import PatientHistoryPage from './pages/patient/PatientHistoryPage';
 import PatientProfilePage from './pages/patient/PatientProfilePage';
 import RescheduleAppointmentPage from './pages/patient/RescheduleAppointmentPage';
@@ -72,7 +68,7 @@ function ApplicationRoutes() {
           }
         >
           <Route index element={<PatientDashboard />} />
-          <Route path="inicio" element={<PatientDashboard />} />
+          <Route path="inicio" element={<Navigate to="/paciente" replace />} />
           <Route path="buscar" element={<SearchDoctorsPage />} />
           <Route path="medicos/:id" element={<DoctorDetailPage />} />
           <Route path="reservar-cita" element={<BookAppointmentPage />} />
@@ -82,15 +78,6 @@ function ApplicationRoutes() {
           <Route path="cita/:id/reprogramar" element={<RescheduleAppointmentPage />} />
           <Route path="perfil" element={<PatientProfilePage />} />
         </Route>
-
-        <Route
-          path="/paciente/inicio"
-          element={
-            <ProtectedRoute allowedRoles={['PACIENTE', 'PATIENT']}>
-              <PatientDashboardPage />
-            </ProtectedRoute>
-          }
-        />
 
         <Route
           path="/medico/dashboard"
@@ -156,9 +143,6 @@ function ApplicationRoutes() {
           <Route path="estadisticas" element={<StatisticsPage />} />
           <Route path="perfil" element={<AdminProfilePage />} />
         </Route>
-
-        <Route path="/login-local" element={<Login />} />
-        <Route path="/registro-local" element={<Register />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

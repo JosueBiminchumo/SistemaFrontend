@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { appointmentStatuses } from './doctorStorage';
 import DoctorLayout from './DoctorLayout';
 import './DoctorAppointmentsPage.css';
 import { listAppointments } from '../../services/appointmentService';
+
+const appointmentStatuses = ['PENDIENTE', 'CONFIRMADA', 'COMPLETADA', 'CANCELADA'];
 
 export default function DoctorAppointmentsPage() {
   const [appointments, setAppointments] = useState([]);

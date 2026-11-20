@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const statusInformation = {
   PENDIENTE: {
     label: 'Pendiente',
@@ -23,9 +25,9 @@ export default function RecentAppointments({ appointments }) {
       <div className="section-heading section-heading--row">
         <h2>Próximas citas</h2>
 
-        <button type="button" className="text-button">
+        <Link to="/admin/citas" className="text-button">
           Ver todas <span aria-hidden="true">›</span>
-        </button>
+        </Link>
       </div>
 
       {appointments.length === 0 ? (

@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { listDoctors } from '../../services/doctorService';
 import './PublicPages.css';
 
 const options = [
@@ -40,6 +42,15 @@ const options = [
 ];
 
 export default function HomePage() {
+  const [doctorCount, setDoctorCount] = useState(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    listDoctors()
+      .then((doctors) => setDoctorCount(doctors.length))
+      .catch((requestError) => setError(requestError.message));
+  }, []);
+
   return (
     <main className="public-page">
       <section className="vento-hero">
@@ -62,7 +73,8 @@ export default function HomePage() {
 
         <div className="hero-summary" aria-label="Resumen de medicos">
           <span>Medicos disponibles</span>
-          <strong>4</strong>
+          <strong>{doctorCount ?? '—'}</strong>
+          {error && <small role="alert">{error}</small>}
         </div>
       </section>
 

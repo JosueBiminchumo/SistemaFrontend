@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getAppointments, getProfile, todayISO } from './doctorStorage';
+import { listAppointments } from '../../services/appointmentService';
+import { getCurrentUser } from '../../services/authService';
+import { listDoctors } from '../../services/doctorService';
 import DoctorLayout from './DoctorLayout';
 import './DoctorDashboardPage.css';
 
@@ -14,11 +17,57 @@ function getGreeting() {
   return 'Buenas noches';
 }
 
+function getTodayISO() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export default function DoctorDashboardPage() {
   const navigate = useNavigate();
-  const profile = getProfile();
-  const appointments = getAppointments();
-  const today = todayISO(0);
+  const [profile, setProfile] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([getCurrentUser(), listDoctors(), listAppointments()])
+      .then(([user, doctors, appointmentItems]) => {
+        const doctor = doctors.find((item) => item.userId === user.id);
+        if (!doctor) {
+          throw new Error('No existe un perfil médico asociado a esta cuenta.');
+        }
+        setProfile({
+          name: `${doctor.firstName} ${doctor.lastName}`,
+          specialty: doctor.specialty,
+        });
+        setAppointments(appointmentItems.map((appointment) => ({
+          ...appointment,
+          date: appointment.startAt.slice(0, 10),
+          time: appointment.startAt.slice(11, 16),
+          status: {
+            PENDING: 'PENDIENTE',
+            CONFIRMED: 'CONFIRMADA',
+            COMPLETED: 'COMPLETADA',
+            CANCELLED: 'CANCELADA',
+          }[appointment.status] ?? appointment.status,
+        })));
+      })
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <DoctorLayout><p role="status">Cargando panel médico...</p></DoctorLayout>;
+  }
+
+  if (error || !profile) {
+    return <DoctorLayout><p role="alert">{error || 'No se encontró el perfil médico.'}</p></DoctorLayout>;
+  }
+
+  const today = getTodayISO();
 
   const todayAppointments = appointments
     .filter((appt) => appt.date === today && appt.status !== 'CANCELADA')
@@ -45,6 +94,7 @@ export default function DoctorDashboardPage() {
   return (
     <DoctorLayout>
       <div className="doctor-dashboard">
+        {error && <p role="alert">{error}</p>}
         <header className="doctor-dashboard__header">
           <div className="doctor-dashboard__header-text">
             <p className="doctor-dashboard__subtitle">{profile.specialty}</p>

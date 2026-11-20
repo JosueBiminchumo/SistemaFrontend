@@ -18,6 +18,7 @@ import com.mediturno.backend.common.exception.ResourceNotFoundException;
 import com.mediturno.backend.doctor.domain.Doctor;
 import com.mediturno.backend.doctor.domain.DoctorSchedule;
 import com.mediturno.backend.doctor.dto.DoctorResponse;
+import com.mediturno.backend.doctor.dto.DoctorScheduleEntryResponse;
 import com.mediturno.backend.doctor.dto.DoctorScheduleResponse;
 import com.mediturno.backend.doctor.dto.DoctorScheduleUpdateRequest;
 import com.mediturno.backend.doctor.repository.DoctorRepository;
@@ -86,6 +87,17 @@ public class DoctorService {
                     }
                     return DoctorScheduleResponse.from(schedule, date, List.copyOf(availableSlots));
                 })
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<DoctorScheduleEntryResponse> getOwnSchedule(String email) {
+        Doctor doctor = doctorRepository.findByUserEmail(email)
+                .filter(Doctor::isActive)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe un perfil activo para este médico."));
+        return scheduleRepository.findAllByDoctorIdAndActiveTrueOrderByDayOfWeekAscStartTimeAsc(doctor.getId())
+                .stream()
+                .map(DoctorScheduleEntryResponse::from)
                 .toList();
     }
 

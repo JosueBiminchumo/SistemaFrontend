@@ -12,8 +12,6 @@ import AppointmentTable from '../../components/appointments/AppointmentTable';
 import './AppointmentsManagementPage.css';
 import { cancelAppointment, listAppointments } from '../../services/appointmentService';
 
-const initialAppointments = [];
-
 const statusLabels = {
   PENDIENTE: 'Pendiente',
   CONFIRMADA: 'Confirmada',
@@ -22,7 +20,7 @@ const statusLabels = {
 };
 
 export default function AppointmentsManagementPage() {
-  const [appointments, setAppointments] = useState(initialAppointments);
+  const [appointments, setAppointments] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('TODOS');
   const [selectedAppointment, setSelectedAppointment] = useState(null);

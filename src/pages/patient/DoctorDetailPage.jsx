@@ -1,86 +1,72 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { doctorsMock } from './doctorsMock';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getDoctor } from '../../services/doctorService';
 
 const DoctorDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [doctor, setDoctor] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  // Buscar el médico por el ID de la URL
-  const doctor = doctorsMock.find(doc => doc.id === parseInt(id));
+  useEffect(() => {
+    getDoctor(id)
+      .then(setDoctor)
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-  // Si el usuario escribe un ID que no existe en la URL
-  if (!doctor) {
+  if (loading) {
+    return <main className="container py-5"><p role="status">Cargando médico...</p></main>;
+  }
+
+  if (error || !doctor) {
     return (
-      <div className="container py-5 text-center">
+      <main className="container py-5 text-center">
         <h2>Médico no encontrado</h2>
+        {error && <p role="alert">{error}</p>}
         <button className="btn btn-primary mt-3" onClick={() => navigate('/paciente/buscar')}>
           Volver a la búsqueda
         </button>
-      </div>
+      </main>
     );
   }
 
+  const name = `${doctor.firstName} ${doctor.lastName}`;
+
   return (
-    <div className="container py-5">
+    <main className="container py-5">
       <button className="btn btn-outline-secondary mb-4" onClick={() => navigate('/paciente/buscar')}>
         &larr; Volver a la búsqueda
       </button>
-      
-      <div className="card shadow-sm border-0">
-        <div className="row g-0">
-          <div className="col-md-4 bg-light p-4 text-center">
-            <img 
-              src={doctor.image} 
-              alt={doctor.name} 
-              className="img-fluid rounded-circle mb-3 shadow"
-              style={{ width: '200px', height: '200px', objectFit: 'cover' }}
-            />
-            <h4 className="fw-bold">{doctor.name}</h4>
-            <h6 className="text-primary">{doctor.specialty}</h6>
-          </div>
-          
-          <div className="col-md-8 p-4 d-flex flex-column">
-            <h5 className="mb-3 border-bottom pb-2">Información del Médico</h5>
-            <p className="mb-1"><strong>Experiencia:</strong> {doctor.experience}</p>
-            <p className="mb-1"><strong>Calificación:</strong> ⭐ {doctor.rating}</p>
-            <p className="mb-4">
-              <strong>Estado:</strong>{' '}
-              <span className={`badge ${doctor.availability ? 'bg-success' : 'bg-danger'}`}>
-                {doctor.availability ? 'Disponible para citas' : 'No disponible temporalmente'}
-              </span>
-            </p>
 
-            <h5 className="mb-3 border-bottom pb-2">Horarios Disponibles</h5>
-            {doctor.schedule && doctor.schedule.length > 0 ? (
-              <div className="d-flex flex-wrap gap-2 mb-4">
-                {doctor.schedule.map((time, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    className={`btn ${selectedTime === time ? 'btn-primary' : 'btn-outline-primary'}`}
-                    onClick={() => setSelectedTime(time)}
-                  >
-                    {time}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted mb-4">No hay horarios registrados para este médico.</p>
-            )}
-
-            <button 
-              className="btn btn-success btn-lg mt-auto"
-              disabled={!doctor.availability || doctor.schedule.length === 0 || !selectedTime}
-              onClick={() => alert(`Horario seleccionado: ${selectedTime}. La lógica para reservar la cita se implementará en el siguiente ticket.`)}
-            >
-              {selectedTime ? `Continuar con la Reserva (${selectedTime})` : 'Selecciona un horario para continuar'}
-            </button>
+      <section className="card shadow-sm border-0">
+        <div className="card-body p-4">
+          <div className="d-flex align-items-center gap-3 mb-4">
+            <div className="rounded-circle bg-primary-subtle text-primary fw-bold fs-3 p-4" aria-hidden="true">
+              {`${doctor.firstName?.[0] ?? ''}${doctor.lastName?.[0] ?? ''}`.toUpperCase()}
+            </div>
+            <div>
+              <h1 className="h3 mb-1">{name}</h1>
+              <p className="text-primary mb-0">{doctor.specialty}</p>
+            </div>
           </div>
+
+          <h2 className="h5">Información del médico</h2>
+          <p><strong>CMP:</strong> {doctor.licenseNumber}</p>
+          <p><strong>Estado:</strong> {doctor.active ? 'Activo' : 'Inactivo'}</p>
+          <p>{doctor.biography || 'No hay una biografía registrada.'}</p>
+
+          <button
+            className="btn btn-success btn-lg mt-3"
+            disabled={!doctor.active}
+            onClick={() => navigate('/paciente/reservar-cita')}
+          >
+            Reservar una cita
+          </button>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 

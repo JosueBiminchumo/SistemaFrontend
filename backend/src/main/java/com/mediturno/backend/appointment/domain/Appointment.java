@@ -93,6 +93,11 @@ public class Appointment {
         this.status = AppointmentStatus.CONFIRMED;
     }
 
+    public void complete() {
+        this.status = AppointmentStatus.COMPLETED;
+        this.activeSlotKey = null;
+    }
+
     @PrePersist
     void setCreationTimestamps() {
         LocalDateTime now = LocalDateTime.now();

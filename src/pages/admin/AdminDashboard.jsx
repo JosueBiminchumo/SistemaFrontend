@@ -81,7 +81,7 @@ function mapUpcomingAppointments(appointments) {
       id: appointment.id,
       patient: appointment.patientName,
       doctor: appointment.doctorName,
-      specialty: appointment.specialty,
+      specialty: appointment.specialtyName,
       date: appointment.startAt.slice(0, 10),
       time: appointment.startAt.slice(11, 16),
       status: appointmentStatusLabels[appointment.status] ?? appointment.status,
@@ -110,8 +110,8 @@ export default function AdminDashboard() {
     ])
       .then(([dashboard, byDay, byStatus, appointmentItems]) => {
         setReport(dashboard);
-        setDailySeries(byDay.values);
-        setStatusSeries(byStatus.values);
+        setDailySeries(byDay.points || []);
+        setStatusSeries(byStatus.points || dashboard.appointmentsByStatus || []);
         setAppointments(appointmentItems);
       })
       .catch((requestError) => setError(requestError.message))
@@ -144,14 +144,14 @@ export default function AdminDashboard() {
     ? [
         {
           title: 'Total médicos',
-          value: report.doctors,
+          value: report.totalDoctors,
           description: 'Activos',
           icon: Stethoscope,
           color: 'blue',
         },
         {
           title: 'Total pacientes',
-          value: report.patients,
+          value: report.totalPatients,
           description: 'Registrados',
           icon: UsersRound,
           color: 'cyan',

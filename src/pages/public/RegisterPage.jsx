@@ -1,10 +1,19 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import AuthModal from '../../components/auth/AuthModal';
 import RegisterForm from '../../components/auth/RegisterForm';
 import { register } from '../../services/authService';
 import './PublicPages.css';
 
+const HOME_LOCATION = { pathname: '/' };
+
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const backgroundLocation = location.state?.backgroundLocation || HOME_LOCATION;
+  const closeModal = useCallback(() => {
+    navigate(backgroundLocation, { replace: true });
+  }, [backgroundLocation, navigate]);
 
   const handleRegister = async (patient) => {
     const response = await register(patient);
@@ -20,36 +29,18 @@ export default function RegisterPage() {
         email: user.email,
         role: user.role,
         dashboardPath: '/paciente',
-      })
+      }),
     );
     navigate('/paciente/perfil');
   };
 
   return (
-    <main className="auth-page">
-      <section className="auth-panel">
-        <div className="auth-copy">
-          <span className="eyebrow">Registro de paciente</span>
-          <h1>Crea una cuenta para solicitar citas</h1>
-          <p>
-            Completa tus datos personales para crear una cuenta de paciente.
-          </p>
-          <ul className="auth-list">
-            <li>Campos obligatorios para datos personales.</li>
-            <li>Validacion de DNI, celular, correo y contrasena.</li>
-            <li>Confirmacion visual del registro.</li>
-          </ul>
-        </div>
-
-        <div className="auth-card auth-card--wide">
-          <h2>Crear cuenta</h2>
-          <p className="auth-subtitle">Completa tus datos como paciente.</p>
-          <RegisterForm onRegister={handleRegister} />
-          <p className="auth-footer">
-            Ya tienes cuenta? <Link to="/login">Inicia sesion</Link>
-          </p>
-        </div>
-      </section>
-    </main>
+    <AuthModal className="auth-modal--register" onClose={closeModal} title="Crea tu cuenta">
+      <RegisterForm onRegister={handleRegister} />
+      <p className="auth-footer">
+        ¿Ya tienes cuenta?{' '}
+        <Link to="/login" state={{ backgroundLocation }}>Inicia sesión</Link>
+      </p>
+    </AuthModal>
   );
 }

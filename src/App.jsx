@@ -35,30 +35,36 @@ import DoctorSchedule from './pages/doctor/DoctorSchedulePage';
 import DoctorPatientsPage from './pages/doctor/DoctorPatientsPage';
 
 import DoctorsPage from './pages/public/DoctorsPage';
+import AboutPage from './pages/public/AboutPage';
 import HomePage from './pages/public/HomePage';
 import LoginPage from './pages/public/LoginPage';
 import NotFoundPage from './pages/public/NotFoundPage';
 import RegisterPage from './pages/public/RegisterPage';
+import SpecialtiesPage from './pages/public/SpecialtiesPage';
 import UnauthorizedPage from './pages/public/UnauthorizedPage';
 
 function ApplicationRoutes() {
   const location = useLocation();
-  const hideNavbarRoutes = ['/', '/login', '/registro', '/auth'];
-  const hasOwnNavigation = ['/admin', '/paciente', '/medico'].some((path) =>
-    location.pathname.startsWith(path),
-  );
-  const shouldShowNavbar =
-    !hideNavbarRoutes.includes(location.pathname) && !hasOwnNavigation;
+  const authModalRoute = ['/login', '/registro'].includes(location.pathname);
+  const defaultBackgroundLocation = authModalRoute
+    ? { ...location, pathname: '/', search: '', hash: '' }
+    : null;
+  const backgroundLocation = location.state?.backgroundLocation || defaultBackgroundLocation;
+  const routeLocation = backgroundLocation || location;
+  const publicNavbarRoutes = ['/', '/medicos', '/especialidades', '/nosotros', '/login', '/registro', '/unauthorized'];
+  const shouldShowNavbar = publicNavbarRoutes.includes(routeLocation.pathname);
 
   return (
-    <>
+    <div className={shouldShowNavbar ? 'app-frame app-frame--public' : 'app-frame'}>
       {shouldShowNavbar && <Navbar />}
 
-      <Routes>
+      <Routes location={routeLocation}>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/medicos" element={<DoctorsPage />} />
+        <Route path="/especialidades" element={<SpecialtiesPage />} />
+        <Route path="/nosotros" element={<AboutPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />
 
@@ -149,7 +155,14 @@ function ApplicationRoutes() {
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </>
+
+      {backgroundLocation && (
+        <Routes location={location}>
+          <Route path="/login" element={<LoginPage isModal />} />
+          <Route path="/registro" element={<RegisterPage isModal />} />
+        </Routes>
+      )}
+    </div>
   );
 }
 

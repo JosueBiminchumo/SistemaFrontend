@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { listDoctors } from '../../services/doctorService';
 import { listSpecialties } from '../../services/specialtyService';
 import './PublicPages.css';
 
 export default function DoctorsPage() {
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState('');
-  const [specialty, setSpecialty] = useState('');
+  const [specialty, setSpecialty] = useState(searchParams.get('especialidad') || '');
   const [doctors, setDoctors] = useState([]);
   const [specialties, setSpecialties] = useState([]);
   const [error, setError] = useState('');
@@ -26,8 +28,7 @@ export default function DoctorsPage() {
     const normalizedSearch = search.trim().toLowerCase();
     return doctors.filter((doctor) => {
       const name = `${doctor.firstName} ${doctor.lastName}`.toLowerCase();
-      return (name.includes(normalizedSearch)
-        || doctor.specialty.toLowerCase().includes(normalizedSearch))
+      return name.includes(normalizedSearch)
         && (!specialty || doctor.specialty === specialty);
     });
   }, [doctors, search, specialty]);
@@ -42,18 +43,18 @@ export default function DoctorsPage() {
 
       <section className="filters-bar" aria-label="Filtros de médicos">
         <label className="field" htmlFor="doctor-search">
-          <span>Buscar</span>
+          <span>Nombre del médico</span>
           <input
             id="doctor-search"
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Nombre o especialidad"
+            placeholder="Buscar por nombre"
             type="search"
             value={search}
           />
         </label>
 
         <label className="field" htmlFor="specialty">
-          <span>Especialidad</span>
+          <span>Filtrar por especialidad</span>
           <select
             id="specialty"
             onChange={(event) => setSpecialty(event.target.value)}
@@ -99,7 +100,7 @@ export default function DoctorsPage() {
                     <dd>{doctor.biography || 'Sin biografía registrada'}</dd>
                   </div>
                 </dl>
-                <Link className="button button--outline button--full" to="/login">
+                <Link className="button button--outline button--full" to="/login" state={{ backgroundLocation: location }}>
                   Iniciar sesión para reservar
                 </Link>
               </article>

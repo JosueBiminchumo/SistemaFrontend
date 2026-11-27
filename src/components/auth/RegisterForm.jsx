@@ -46,7 +46,7 @@ export default function RegisterForm({ onRegister }) {
     }
 
     if (!/^\d{8}$/.test(values.documentNumber.trim())) {
-      nextErrors.documentNumber = 'El DNI debe tener 8 digitos.';
+      nextErrors.documentNumber = 'El DNI debe tener 8 dígitos.';
     }
 
     if (!values.birthDate) {
@@ -54,22 +54,22 @@ export default function RegisterForm({ onRegister }) {
     }
 
     if (!/^\d{9}$/.test(values.phone.trim())) {
-      nextErrors.phone = 'El celular debe tener 9 digitos.';
+      nextErrors.phone = 'El celular debe tener 9 dígitos.';
     }
 
     if (!values.email.trim()) {
       nextErrors.email = 'Ingresa tu correo.';
     } else if (!isValidEmail(values.email)) {
-      nextErrors.email = 'Ingresa un correo valido.';
+      nextErrors.email = 'Ingresa un correo válido.';
     }
 
     if (values.password.length < 8) {
       nextErrors.password =
-        'La contrasena debe tener al menos 8 caracteres.';
+        'La contraseña debe tener al menos 8 caracteres.';
     }
 
     if (values.confirmPassword !== values.password) {
-      nextErrors.confirmPassword = 'Las contrasenas no coinciden.';
+      nextErrors.confirmPassword = 'Las contraseñas no coinciden.';
     }
 
     if (!values.acceptedTerms) {
@@ -206,7 +206,7 @@ export default function RegisterForm({ onRegister }) {
       </label>
 
       <label className="field" htmlFor="register-email">
-        <span>Correo electronico</span>
+        <span>Correo electrónico</span>
         <input
           autoComplete="email"
           id="register-email"
@@ -221,13 +221,13 @@ export default function RegisterForm({ onRegister }) {
 
       <div className="form-grid">
         <label className="field" htmlFor="register-password">
-          <span>Contrasena</span>
+          <span>Contraseña</span>
           <input
             autoComplete="new-password"
             id="register-password"
             name="password"
             onChange={handleChange}
-            placeholder="Minimo 8 caracteres"
+            placeholder="Mínimo 8 caracteres"
             type="password"
             value={values.password}
           />
@@ -235,13 +235,13 @@ export default function RegisterForm({ onRegister }) {
         </label>
 
         <label className="field" htmlFor="confirm-password">
-          <span>Confirmar contrasena</span>
+          <span>Confirmar contraseña</span>
           <input
             autoComplete="new-password"
             id="confirm-password"
             name="confirmPassword"
             onChange={handleChange}
-            placeholder="Repite tu contrasena"
+            placeholder="Repite tu contraseña"
             type="password"
             value={values.confirmPassword}
           />
@@ -263,7 +263,7 @@ export default function RegisterForm({ onRegister }) {
           type="checkbox"
         />
         <span>
-          Acepto el uso de mis datos para gestionar citas medicas.
+          Acepto el uso de mis datos para gestionar citas médicas.
         </span>
       </label>
 

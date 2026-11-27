@@ -1,10 +1,12 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import { getCurrentUser, logout } from '../../services/authService';
 import './PatientLayout.css';
 
 export default function PatientLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState('');
@@ -21,8 +23,25 @@ export default function PatientLayout() {
     setSidebarOpen(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: '¿Cerrar sesión?',
+      text: '¿Seguro que deseas salir de tu cuenta?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cerrar sesión',
+      cancelButtonText: 'Seguir aquí',
+      reverseButtons: true,
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#e2e8f0',
+      customClass: { cancelButton: 'swal-cancel-button' },
+    });
+
+    if (!result.isConfirmed) return;
+
     logout();
+    closeSidebar();
+    navigate('/login', { replace: true });
   };
 
   const firstName = profile?.firstName ?? '';
@@ -145,17 +164,14 @@ export default function PatientLayout() {
         </nav>
 
         <div className="sidebar-footer">
-          <Link
-            to="/login"
-            onClick={() => {
-              closeSidebar();
-              handleLogout();
-            }}
+          <button
+            type="button"
+            onClick={handleLogout}
             className="sidebar-logout"
           >
             <span>🚪</span>
             Cerrar sesión
-          </Link>
+          </button>
         </div>
       </aside>
 

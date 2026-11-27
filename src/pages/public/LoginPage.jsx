@@ -1,9 +1,19 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { HeartPulse, ShieldCheck } from 'lucide-react';
+import AuthModal from '../../components/auth/AuthModal';
 import LoginForm from '../../components/auth/LoginForm';
 import './PublicPages.css';
 
+const HOME_LOCATION = { pathname: '/' };
+
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const backgroundLocation = location.state?.backgroundLocation || HOME_LOCATION;
+  const closeModal = useCallback(() => {
+    navigate(backgroundLocation, { replace: true });
+  }, [backgroundLocation, navigate]);
 
   const handleLogin = (user) => {
     localStorage.setItem('mediturn_user', JSON.stringify(user));
@@ -11,30 +21,21 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="auth-page">
-      <section className="auth-panel auth-panel--login">
-        <div className="auth-copy">
-          <span className="eyebrow">Acceso</span>
-          <h1>Inicia sesion en MediTurn</h1>
-          <p>
-            Ingresa con la cuenta registrada en el sistema.
-          </p>
-          <ul className="auth-list">
-            <li>Validacion de correo y contrasena.</li>
-            <li>Acceso para paciente, medico y administrador.</li>
-            <li>Redireccion al panel principal.</li>
-          </ul>
-        </div>
-
-        <div className="auth-card">
-          <h2>Iniciar sesion</h2>
-          <p className="auth-subtitle">Tus credenciales se validan con el sistema.</p>
-          <LoginForm onLogin={handleLogin} />
-          <p className="auth-footer">
-            No tienes cuenta? <Link to="/registro">Registrate aqui</Link>
-          </p>
-        </div>
-      </section>
-    </main>
+    <AuthModal className="auth-modal--login" onClose={closeModal} title="Inicia sesión">
+      <div className="login-modal-welcome">
+        <span className="login-modal-welcome__icon"><HeartPulse size={23} aria-hidden="true" /></span>
+        <span>
+          <strong>Bienvenido de nuevo</strong>
+          <small>Tu espacio de salud te espera.</small>
+        </span>
+        <ShieldCheck className="login-modal-welcome__secure" size={20} aria-hidden="true" />
+      </div>
+      <p className="auth-modal__subtitle">Ingresa tus datos para acceder a tu cuenta.</p>
+      <LoginForm onLogin={handleLogin} />
+      <p className="auth-footer">
+        ¿No tienes cuenta?{' '}
+        <Link to="/registro" state={{ backgroundLocation }}>Regístrate aquí</Link>
+      </p>
+    </AuthModal>
   );
 }

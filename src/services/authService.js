@@ -56,12 +56,18 @@ export const register = async (userData) => {
 };
 
 export const getCurrentUser = async () => {
-  try {
-    const { data } = await api.get('/auth/me');
-    return data;
-  } catch (error) {
-    throw new Error(error.message || 'Error al cargar la cuenta', { cause: error });
+  const storedUser = getStoredUser();
+  if (storedUser) return storedUser;
+
+  const payload = parseJwt(getToken());
+  if (!payload) {
+    throw new Error('No se encontraron datos de una sesión activa.');
   }
+
+  return {
+    email: payload.sub || payload.email || '',
+    role: payload.role || payload.rol || payload.authorities?.[0] || '',
+  };
 };
 
 export const logout = () => {

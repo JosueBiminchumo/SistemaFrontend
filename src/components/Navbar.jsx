@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { HeartPulse } from 'lucide-react';
 import {
   getCurrentUser,
   isAuthenticated,
@@ -35,15 +36,24 @@ export default function Navbar() {
       {error && <p role="alert">{error}</p>}
       <nav className="navbar" aria-label="Navegación principal">
         <Link className="navbar__brand" to="/">
-          <span className="navbar__mark" aria-hidden="true">M</span>
-          <strong>MediTurn</strong>
+          <span className="navbar__mark" aria-hidden="true"><HeartPulse size={21} /></span>
+          <span className="navbar__brand-copy">
+            <strong>MediTurn</strong>
+            <small>Salud a tu tiempo</small>
+          </span>
         </Link>
         <div className="navbar__links">
-          <NavLink className="navbar__link" to="/">
+          <NavLink className="navbar__link" to="/" end>
             Inicio
           </NavLink>
           <NavLink className="navbar__link" to="/medicos">
             Médicos
+          </NavLink>
+          <NavLink className="navbar__link" to="/especialidades">
+            Especialidades
+          </NavLink>
+          <NavLink className="navbar__link" to="/nosotros">
+            Nosotros
           </NavLink>
           {dashboardPath && (
             <NavLink className="navbar__link" to={dashboardPath}>
@@ -62,10 +72,10 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <NavLink className="navbar__link" to="/login" state={{ from: location.pathname }}>
+              <NavLink className="navbar__link" to="/login" state={{ backgroundLocation: location }}>
                 Iniciar sesión
               </NavLink>
-              <Link className="navbar__button" to="/registro">
+              <Link className="navbar__button" to="/registro" state={{ backgroundLocation: location }}>
                 Registrarse
               </Link>
             </>

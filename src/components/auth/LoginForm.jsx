@@ -33,13 +33,13 @@ export default function LoginForm({ onLogin }) {
     if (!values.email.trim()) {
       nextErrors.email = 'Ingresa tu correo.';
     } else if (!isValidEmail(values.email)) {
-      nextErrors.email = 'Ingresa un correo valido.';
+      nextErrors.email = 'Ingresa un correo válido.';
     }
 
     if (!values.password.trim()) {
-      nextErrors.password = 'Ingresa tu contrasena.';
+      nextErrors.password = 'Ingresa tu contraseña.';
     } else if (values.password.length < 6) {
-      nextErrors.password = 'La contrasena debe tener al menos 6 caracteres.';
+      nextErrors.password = 'La contraseña debe tener al menos 6 caracteres.';
     }
 
     return nextErrors;
@@ -83,7 +83,7 @@ export default function LoginForm({ onLogin }) {
       {message && <p className="form-alert form-alert--info">{message}</p>}
 
       <label className="field" htmlFor="login-email">
-        <span>Correo electronico</span>
+        <span>Correo electrónico</span>
         <input
           autoComplete="email"
           id="login-email"
@@ -97,13 +97,13 @@ export default function LoginForm({ onLogin }) {
       </label>
 
       <label className="field" htmlFor="login-password">
-        <span>Contrasena</span>
+        <span>Contraseña</span>
         <input
           autoComplete="current-password"
           id="login-password"
           name="password"
           onChange={handleChange}
-          placeholder="Ingresa tu contrasena"
+          placeholder="Ingresa tu contraseña"
           type="password"
           value={values.password}
         />
